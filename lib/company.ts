@@ -23,8 +23,8 @@ export const COMPANY = {
     "https://www.instagram.com/lobatoemoraesimoveis",
   ],
   lancamentos: [
-    { nome: "Borgo Belluno", url: "https://borgobelluno.com.br" },
-    { nome: "Villa Mozart", url: "https://villamozartcamposdojordao.com.br" },
+    { nome: "Borgo Belluno", url: "https://borgobelluno.com.br", imagem: "/lancamentos/borgo-belluno.jpg" },
+    { nome: "Villa Mozart", url: "https://villamozartcamposdojordao.com.br", imagem: "/lancamentos/villa-mozart.jpg" },
   ],
   socios: [
     { nome: "Dogmar Lobato", creci: "137573-F" },

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Hero } from "@/components/Hero";
 import { SearchBar } from "@/components/SearchBar";
@@ -117,10 +118,21 @@ export default function HomePage() {
               href={l.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-lg border border-borda bg-white p-6 transition-shadow hover:shadow-md"
+              className="group overflow-hidden rounded-lg border border-borda bg-white transition-shadow hover:shadow-md"
             >
-              <p className="font-display text-xl text-navy">{l.nome}</p>
-              <p className="mt-1 text-sm text-texto-suave">Saiba mais →</p>
+              <div className="relative aspect-[3/2] w-full overflow-hidden">
+                <Image
+                  src={l.imagem}
+                  alt={`Empreendimento ${l.nome}`}
+                  fill
+                  sizes="(min-width: 640px) 50vw, 100vw"
+                  className="object-cover transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+                />
+              </div>
+              <div className="p-6">
+                <p className="font-display text-xl text-navy">{l.nome}</p>
+                <p className="mt-1 text-sm text-texto-suave">Saiba mais →</p>
+              </div>
             </a>
           ))}
         </div>

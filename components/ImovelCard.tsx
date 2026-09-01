@@ -22,6 +22,9 @@ export function ImovelCard({ listing }: { listing: Listing }) {
       className="group block overflow-hidden rounded-lg border border-borda bg-white transition-shadow hover:shadow-lg focus-visible:shadow-lg"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-borda">
+        <span className="absolute left-2 top-2 z-10 rounded bg-dourado px-2 py-0.5 text-xs font-medium text-navy">
+          {listing.finalidade === "venda" ? "Venda" : "Locação"}
+        </span>
         {capa ? (
           <Image
             src={capa.localPath ?? capa.sourceUrl}

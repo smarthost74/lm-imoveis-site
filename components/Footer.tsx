@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { COMPANY } from "@/lib/company";
+import { InstagramIcon, FacebookIcon } from "./icons";
 
 /**
  * Rodapé em colunas por intenção (padrão VivaReal) + NAP completo, exigido
@@ -58,6 +59,27 @@ export function Footer() {
             <span>CRECI {COMPANY.creci}</span>
             <span>{COMPANY.horario}</span>
           </address>
+
+          <div className="mt-4 flex gap-3">
+            <a
+              href={COMPANY.redesSociais[0]}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook da Lobato & Moraes Imóveis"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 hover:border-dourado-light hover:text-dourado-light"
+            >
+              <FacebookIcon className="h-4 w-4" />
+            </a>
+            <a
+              href={COMPANY.redesSociais[1]}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram da Lobato & Moraes Imóveis"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 hover:border-dourado-light hover:text-dourado-light"
+            >
+              <InstagramIcon className="h-4 w-4" />
+            </a>
+          </div>
         </div>
       </div>
 

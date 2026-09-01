@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { COMPANY } from "@/lib/company";
 
 export const metadata: Metadata = { title: "Lançamentos" };
@@ -19,10 +20,21 @@ export default function LancamentosPage() {
             href={l.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-lg border border-borda bg-white p-8 text-center transition-shadow hover:shadow-md"
+            className="group overflow-hidden rounded-lg border border-borda bg-white text-center transition-shadow hover:shadow-md"
           >
-            <p className="font-display text-2xl text-navy">{l.nome}</p>
-            <p className="mt-2 text-sm text-texto-suave">Visitar site do empreendimento →</p>
+            <div className="relative aspect-[3/2] w-full overflow-hidden">
+              <Image
+                src={l.imagem}
+                alt={`Empreendimento ${l.nome}`}
+                fill
+                sizes="(min-width: 640px) 50vw, 100vw"
+                className="object-cover transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+              />
+            </div>
+            <div className="p-8">
+              <p className="font-display text-2xl text-navy">{l.nome}</p>
+              <p className="mt-2 text-sm text-texto-suave">Visitar site do empreendimento →</p>
+            </div>
           </a>
         ))}
       </div>
