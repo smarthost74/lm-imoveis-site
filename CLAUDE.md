@@ -289,12 +289,16 @@ e foram corrigidos.
   `app/imovel/[...legacy]/page.tsx` acumula a página real de imóvel E o
   resolver de legado — Next não permite `[id]` e `[...legacy]` como irmãos
   no mesmo nível de rota.
-- **Redirects do domínio antigo `fernandomoraesimoveis.com.br`: pendentes.**
-  Falta o export do Search Console desse domínio (mesmo processo, ver
-  `docs/redirects-301.md` seção Pendências). A URL
-  `/empreendimento/{slug}/{uf}/{cidade}/{id}` desse domínio confirma que a
-  ImobiBrasil já teve dado estruturado de condomínio no CRM — vale
-  perguntar de novo se dá pra exportar isso no feed `Carga`.
+- **Domínio antigo `fernandomoraesimoveis.com.br`: fora de escopo por
+  decisão do usuário (01/09/2026).** Não migrar, não redirecionar — o
+  projeto trabalha só com `lobatoemoraesimoveis.com.br`. Se ele continuar
+  no ar competindo pelas mesmas buscas (ver briefing seção 5, "Domínio
+  antigo"), isso é uma decisão consciente do usuário, não uma pendência
+  técnica. A observação sobre `/empreendimento/{slug}/{uf}/{cidade}/{id}`
+  (sinal de que a ImobiBrasil já teve dado de condomínio estruturado no
+  CRM) continua válida como pista para uma conversa futura com a
+  ImobiBrasil sobre o feed `Carga`, independente do que acontecer com esse
+  domínio.
 
 ## Pipeline do feed (Etapa 3 — concluída)
 
@@ -352,9 +356,9 @@ cache funcionou como projetado, sem exceção não tratada.
    Etapa 3) antes de gerar qualquer página de condomínio a partir delas.
 4. Sem dado de locação no feed hoje — decidir se a aba "Alugar" da busca fica
    visível vazia (com estado vazio elegante) ou oculta até existir estoque.
-5. **Redirects 301 do domínio antigo `fernandomoraesimoveis.com.br`** ainda
-   não implementados — precisa do export do Search Console desse domínio
-   (o do domínio atual já foi feito, ver `docs/redirects-301.md`).
+5. ~~Redirects 301 do domínio antigo~~ — **fora de escopo**, decisão do
+   usuário em 01/09/2026. Projeto trabalha só com
+   `lobatoemoraesimoveis.com.br`.
 6. Credenciais de SMTP para o envio de e-mail de leads (`SMTP_HOST` etc. em
    `.env.example`) ainda não configuradas em nenhum ambiente — sem isso,
    `/api/leads` loga o lead mas não envia (retorna 503 de propósito).

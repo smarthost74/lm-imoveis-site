@@ -3,6 +3,10 @@
 > Baseado no export do Search Console (Indexação → Páginas → Indexada),
 > 01/09/2026: `docs/search-console-lobatoemoraesimoveis-2026-09-01.csv`
 > (370 URLs). Script de análise: `scripts/analyze-search-console.mjs`.
+>
+> O domínio antigo `fernandomoraesimoveis.com.br` está fora de escopo por
+> decisão do usuário (01/09/2026) — este documento cobre só
+> `lobatoemoraesimoveis.com.br`.
 
 ## Composição real das 370 URLs indexadas
 
@@ -84,12 +88,13 @@ valor individual (filtro de busca).
 
 ## Pendências
 
-1. **Domínio antigo `fernandomoraesimoveis.com.br`** — ainda não temos o
-   export do Search Console dele. Precisa do mesmo processo (seção
-   "Domínio antigo" do briefing) para mapear `/imoveis/{tipo}/...` e
-   `/empreendimento/{slug}/{uf}/{cidade}/{id}` (esse último confirma que a
-   ImobiBrasil já teve dado estruturado de condomínio no CRM — vale
-   perguntar de novo se dá pra exportar isso no feed `Carga`).
+1. ~~Domínio antigo `fernandomoraesimoveis.com.br`~~ — **fora de escopo**,
+   decisão do usuário em 01/09/2026. O projeto trabalha só com
+   `lobatoemoraesimoveis.com.br`; esse domínio não será migrado nem
+   redirecionado por este site. (A observação de que
+   `/empreendimento/{slug}/{uf}/{cidade}/{id}` desse domínio confirmava dado
+   de condomínio estruturado no CRM da ImobiBrasil continua uma pista útil
+   para uma conversa futura sobre o feed `Carga`, independente disso.)
 2. As 3 sugestões de condomínio que ainda não foram confirmadas
    (`content/condominio-overrides.json`) afetam quantos `/hs/*` conseguem
    resolver para uma página de condomínio de verdade em vez do fallback.
