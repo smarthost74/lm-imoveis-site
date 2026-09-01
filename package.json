@@ -10,6 +10,7 @@
     "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
+    "start:cpanel": "node server.js",
     "lint": "eslint",
     "feed:fetch": "node --env-file-if-exists=.env scripts/fetch-feed.ts"
   },

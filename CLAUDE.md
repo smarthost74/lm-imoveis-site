@@ -353,6 +353,18 @@ Testado ponta a ponta em 01/09/2026 contra o feed real, incluindo o cenário
 de falha real (certificado expirado no momento do teste) — o fallback para
 cache funcionou como projetado, sem exceção não tratada.
 
+## Deploy (cPanel)
+
+Guia completo em `docs/deploy-cpanel.md` (não testado contra um cPanel
+real ainda — só o `server.js` e o build, localmente). Pontos que não são
+óbvios: o Passenger do cPanel precisa de um arquivo de entrada que escute
+em `process.env.PORT` — `next start` sozinho não serve, por isso existe
+`server.js` na raiz (custom server mínimo, `npm run start:cpanel` roda
+localmente para testar). Variáveis de ambiente definidas na UI do "Setup
+Node.js App" só valem para o processo do site — **não** ficam disponíveis
+automaticamente no cron job nem em comandos manuais por SSH (precisa de
+`.env.production` separado, fora do Git, ou exportar na sessão).
+
 ## Segurança
 
 - Credenciais/URLs com token (`FEED_CARGA_URL`) sempre em variável de
