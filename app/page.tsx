@@ -7,13 +7,6 @@ import { getActiveListings, getBairros, getCondominios } from "@/lib/data";
 import { COMPANY } from "@/lib/company";
 import { slugify } from "@/lib/feed/slug";
 
-const CHIPS_CATEGORIA = [
-  { label: "Aceita pet", filtro: "pet" },
-  { label: "Com piscina", filtro: "piscina" },
-  { label: "Pronto para morar", filtro: "pronto" },
-  { label: "Aceita seguro-fiança", filtro: "seguro-fianca" },
-];
-
 const BUSCAS_POPULARES = [
   { label: "Apartamento à venda em Taubaté", href: "/apartamento-a-venda-em-taubate" },
   { label: "Casa à venda em Taubaté", href: "/casa-a-venda-em-taubate" },
@@ -28,29 +21,19 @@ export default function HomePage() {
   const bairros = getBairros().slice(0, 4);
   const condominios = getCondominios().slice(0, 4);
 
+  // 3 fotos principais de imóveis diferentes, para o banner (sem texto, só imagem).
+  const fotosBanner = getActiveListings()
+    .slice(0, 3)
+    .map((l) => {
+      const capa = l.fotos.find((f) => f.isPrimary) ?? l.fotos[0];
+      return { src: capa.localPath ?? capa.sourceUrl, alt: `Foto de ${l.titulo}` };
+    });
+
   return (
     <main className="flex flex-col gap-16 pb-16">
-      <Hero
-        imageSrc="/demo/hero.svg"
-        imageAlt="Fachada de imóvel em Taubaté"
-        eyebrow="Taubaté/SP"
-        headline="Imóveis com a curadoria de quem conhece a cidade"
-        subheadline="Carteira própria, corretores CRECI, atendimento direto — sem intermediário de portal."
-      >
+      <Hero layout="split" photos={fotosBanner}>
         <SearchBar cidades={["Taubaté"]} />
       </Hero>
-
-      <section className="mx-auto flex w-full max-w-6xl flex-wrap justify-center gap-3 px-4">
-        {CHIPS_CATEGORIA.map((chip) => (
-          <Link
-            key={chip.filtro}
-            href={`/comprar/taubate?categoria=${chip.filtro}`}
-            className="rounded-full border border-borda bg-white px-4 py-2 text-sm text-navy transition-colors hover:border-dourado"
-          >
-            {chip.label}
-          </Link>
-        ))}
-      </section>
 
       <section className="mx-auto w-full max-w-6xl px-4">
         <h2 className="mb-6 font-display text-2xl text-navy sm:text-3xl">Imóveis em destaque</h2>

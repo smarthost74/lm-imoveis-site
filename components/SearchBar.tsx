@@ -6,75 +6,55 @@ import { slugify } from "@/lib/feed/slug";
 import { SearchIcon } from "./icons";
 
 /**
- * Busca em abas Comprar | Alugar (padrão copiado do VivaReal — ver
- * CLAUDE.md). Cada aba tem sua própria escala de faixa de valor, porque
- * preço de venda e de aluguel não cabem na mesma régua.
- *
- * Sem dado de locação no feed hoje (ver docs/feed-analysis.md), a aba
- * "Alugar" fica visível e funcional — ao buscar, a página de listagem
- * mostra um estado vazio elegante em vez de sumir ou dar 404.
+ * Busca compacta em cartão flutuante (padrão Chaves na Mão, pedido
+ * explícito do usuário — ver CLAUDE.md). Abas Comprar/Alugar substituem as
+ * abas originais "Imóveis/Veículos" do modelo de referência. Dormitórios e
+ * faixa de valor saíram daqui — viraram filtro lateral na página de
+ * listagem (mais detalhe faz sentido lá, não na busca de entrada).
  */
-
-const TIPOS_RESIDENCIAL = ["Apartamento", "Casa"] as const;
-const TIPOS_COMERCIAL = ["Sala Comercial", "Loja", "Galpão"] as const;
-
-const FAIXAS_VENDA = [
-  { label: "Até R$ 300 mil", value: "0-300000" },
-  { label: "R$ 300 mil a R$ 600 mil", value: "300000-600000" },
-  { label: "R$ 600 mil a R$ 1 milhão", value: "600000-1000000" },
-  { label: "Acima de R$ 1 milhão", value: "1000000-" },
-];
-
-const FAIXAS_LOCACAO = [
-  { label: "Até R$ 1.500", value: "0-1500" },
-  { label: "R$ 1.500 a R$ 3.000", value: "1500-3000" },
-  { label: "R$ 3.000 a R$ 5.000", value: "3000-5000" },
-  { label: "Acima de R$ 5.000", value: "5000-" },
-];
+const TIPOS = ["Apartamento", "Casa", "Sala Comercial", "Loja", "Galpão"];
 
 type Finalidade = "venda" | "locacao";
 
 export function SearchBar({ cidades = ["Taubaté"] }: { cidades?: string[] }) {
   const router = useRouter();
   const [finalidade, setFinalidade] = useState<Finalidade>("venda");
-  const [cidade, setCidade] = useState(cidades[0]);
-  const [bairro, setBairro] = useState("");
-  const [tipos, setTipos] = useState<string[]>([]);
-  const [dormitorios, setDormitorios] = useState("");
-  const [faixa, setFaixa] = useState("");
-
-  const faixas = finalidade === "venda" ? FAIXAS_VENDA : FAIXAS_LOCACAO;
-
-  function toggleTipo(tipo: string) {
-    setTipos((prev) => (prev.includes(tipo) ? prev.filter((t) => t !== tipo) : [...prev, tipo]));
-  }
+  const [tipo, setTipo] = useState("");
+  const [localizacao, setLocalizacao] = useState("");
 
   function buscar() {
+    const cidade = cidades[0] ?? "Taubaté";
+    if (tipo) {
+      const acao = finalidade === "venda" ? "a-venda-em" : "para-alugar-em";
+      const params = new URLSearchParams();
+      if (localizacao) params.set("bairro", localizacao);
+      const qs = params.toString();
+      router.push(`/${slugify(tipo)}-${acao}-${slugify(cidade)}${qs ? `?${qs}` : ""}`);
+      return;
+    }
     const params = new URLSearchParams();
-    if (bairro) params.set("bairro", bairro);
-    if (tipos.length) params.set("tipo", tipos.join(","));
-    if (dormitorios) params.set("dormitorios", dormitorios);
-    if (faixa) params.set("faixa", faixa);
-    router.push(`/${finalidade === "venda" ? "comprar" : "alugar"}/${slugify(cidade)}?${params.toString()}`);
+    if (localizacao) params.set("bairro", localizacao);
+    router.push(
+      `/${finalidade === "venda" ? "comprar" : "alugar"}/${slugify(cidade)}?${params.toString()}`
+    );
   }
 
   return (
-    <div className="w-full max-w-3xl rounded-lg bg-white shadow-xl">
-      <div role="tablist" aria-label="Finalidade da busca" className="flex">
+    <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
+      <h2 className="mb-4 font-display text-xl text-navy">Escolha o seu novo imóvel</h2>
+
+      <div role="tablist" aria-label="Finalidade da busca" className="mb-4 flex gap-2">
         {(["venda", "locacao"] as const).map((f) => (
           <button
             key={f}
             role="tab"
             type="button"
             aria-selected={finalidade === f}
-            onClick={() => {
-              setFinalidade(f);
-              setFaixa("");
-            }}
-            className={`flex-1 rounded-t-lg px-4 py-3 text-sm font-medium transition-colors ${
+            onClick={() => setFinalidade(f)}
+            className={`flex-1 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
               finalidade === f
-                ? "bg-white text-navy border-b-2 border-dourado"
-                : "bg-creme text-texto-suave hover:text-navy"
+                ? "border-navy bg-navy text-white"
+                : "border-borda bg-white text-texto-suave hover:border-navy"
             }`}
           >
             {f === "venda" ? "Comprar" : "Alugar"}
@@ -82,88 +62,38 @@ export function SearchBar({ cidades = ["Taubaté"] }: { cidades?: string[] }) {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="flex flex-col gap-3">
         <label className="flex flex-col text-sm">
-          <span className="mb-1 text-texto-suave">Cidade</span>
+          <span className="mb-1 font-medium text-texto-suave">Tipo de Imóvel</span>
           <select
-            value={cidade}
-            onChange={(e) => setCidade(e.target.value)}
-            className="rounded border border-borda px-3 py-2"
+            value={tipo}
+            onChange={(e) => setTipo(e.target.value)}
+            className="rounded-lg border border-borda px-3 py-2.5"
           >
-            {cidades.map((c) => (
-              <option key={c} value={c}>
-                {c}
+            <option value="">Todos</option>
+            {TIPOS.map((t) => (
+              <option key={t} value={t}>
+                {t}
               </option>
             ))}
           </select>
         </label>
 
         <label className="flex flex-col text-sm">
-          <span className="mb-1 text-texto-suave">Bairro</span>
+          <span className="mb-1 font-medium text-texto-suave">Localização</span>
           <input
             type="text"
-            value={bairro}
-            onChange={(e) => setBairro(e.target.value)}
-            placeholder="Qualquer bairro"
-            className="rounded border border-borda px-3 py-2"
+            value={localizacao}
+            onChange={(e) => setLocalizacao(e.target.value)}
+            placeholder="Digite cidade, bairro ou rua"
+            className="rounded-lg border border-borda px-3 py-2.5"
           />
         </label>
 
-        <fieldset className="flex flex-col text-sm">
-          <legend className="mb-1 text-texto-suave">Tipo</legend>
-          <div className="flex flex-wrap gap-x-3 gap-y-1">
-            {[...TIPOS_RESIDENCIAL, ...TIPOS_COMERCIAL].map((tipo) => (
-              <label key={tipo} className="flex items-center gap-1 text-texto-suave">
-                <input
-                  type="checkbox"
-                  checked={tipos.includes(tipo)}
-                  onChange={() => toggleTipo(tipo)}
-                  className="accent-dourado"
-                />
-                {tipo}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
-        <label className="flex flex-col text-sm">
-          <span className="mb-1 text-texto-suave">Dormitórios</span>
-          <select
-            value={dormitorios}
-            onChange={(e) => setDormitorios(e.target.value)}
-            className="rounded border border-borda px-3 py-2"
-          >
-            <option value="">Qualquer</option>
-            {[1, 2, 3, 4].map((n) => (
-              <option key={n} value={n}>
-                {n}+
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="flex flex-col text-sm">
-          <span className="mb-1 text-texto-suave">Faixa de valor</span>
-          <select
-            value={faixa}
-            onChange={(e) => setFaixa(e.target.value)}
-            className="rounded border border-borda px-3 py-2"
-          >
-            <option value="">Qualquer valor</option>
-            {faixas.map((f) => (
-              <option key={f.value} value={f.value}>
-                {f.label}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      <div className="px-4 pb-4">
         <button
           type="button"
           onClick={buscar}
-          className="flex w-full items-center justify-center gap-2 rounded bg-navy px-4 py-3 font-medium text-white transition-colors hover:bg-navy-light"
+          className="mt-1 flex w-full items-center justify-center gap-2 rounded-lg bg-dourado px-4 py-3 font-medium text-navy transition-colors hover:brightness-95"
         >
           <SearchIcon className="h-4 w-4" />
           Buscar

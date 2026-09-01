@@ -2,19 +2,16 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 
 /**
- * Hero reutilizado em home, página de bairro e de condomínio — muda a
- * imagem, o texto e opcionalmente o conteúdo sobreposto (a busca, na
- * home). Fotografia própria (HDR), nunca banco de imagens.
+ * Hero reutilizado em home, página de bairro e de condomínio (ver
+ * CLAUDE.md). Dois layouts:
+ * - `overlay` (padrão): uma foto full-bleed com headline sobreposta — usado
+ *   em bairro/condomínio, onde o nome do lugar é informação, não marketing.
+ * - `split`: banner sem texto, colagem de fotos à direita — usado na home,
+ *   com a busca ocupando o lado esquerdo (pedido explícito do usuário,
+ *   inspirado no padrão de portal "Chaves na Mão").
  */
-export function Hero({
-  imageSrc,
-  imageAlt,
-  eyebrow,
-  headline,
-  subheadline,
-  children,
-  minHeight = "min-h-[520px]",
-}: {
+interface HeroOverlayProps {
+  layout?: "overlay";
   imageSrc: string;
   imageAlt: string;
   eyebrow?: string;
@@ -22,7 +19,53 @@ export function Hero({
   subheadline?: string;
   children?: ReactNode;
   minHeight?: string;
-}) {
+}
+
+interface HeroSplitProps {
+  layout: "split";
+  photos: { src: string; alt: string }[];
+  children?: ReactNode;
+}
+
+export function Hero(props: HeroOverlayProps | HeroSplitProps) {
+  if (props.layout === "split") {
+    const { photos, children } = props;
+    const [principal, ...resto] = photos;
+    return (
+      <section className="grid grid-cols-1 lg:grid-cols-2">
+        <div className="flex items-center justify-center bg-navy px-4 py-12 sm:py-16 lg:py-24">
+          {children}
+        </div>
+        <div className="grid h-64 grid-cols-2 gap-1 lg:h-[560px] lg:grid-rows-2">
+          {principal && (
+            <div className="relative col-span-2 overflow-hidden lg:col-span-1 lg:row-span-2">
+              <Image
+                src={principal.src}
+                alt={principal.alt}
+                fill
+                priority
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                className="object-cover"
+              />
+            </div>
+          )}
+          {resto.slice(0, 2).map((foto, i) => (
+            <div key={i} className="relative hidden overflow-hidden lg:block">
+              <Image
+                src={foto.src}
+                alt={foto.alt}
+                fill
+                sizes="25vw"
+                className="object-cover"
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  const { imageSrc, imageAlt, eyebrow, headline, subheadline, children, minHeight = "min-h-[520px]" } = props;
   return (
     <section className={`relative flex ${minHeight} items-end justify-center overflow-hidden`}>
       <Image
