@@ -101,7 +101,6 @@ for (const block of imovelBlocks) {
   const obs = getTag(block, 'Observacao');
   const cidade = getTag(block, 'Cidade');
   const bairro = getTag(block, 'Bairro');
-  const endereco = getTag(block, 'Endereco');
   const cod = getTag(block, 'CodigoImovel');
   if (!obs) continue;
   condoTotal++;

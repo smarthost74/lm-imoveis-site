@@ -1,4 +1,4 @@
-import type { CharacteristicInfo, CharacteristicKey } from "./types";
+import type { CharacteristicInfo, CharacteristicKey } from "./types.ts";
 
 /**
  * Dicionário tag XML → { label PT-BR, grupo }. Lista ABERTA: o parser deve

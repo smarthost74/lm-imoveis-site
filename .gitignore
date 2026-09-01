@@ -41,3 +41,6 @@ next-env.d.ts
 
 # feed image cache (re-hosted daily, not source-controlled)
 /public/imoveis-cache/
+
+# store de listings + cache do XML do feed, gerado pelo job diario
+/data/
