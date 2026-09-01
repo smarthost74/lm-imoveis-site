@@ -10,6 +10,9 @@ import { PhoneIcon, WhatsappIcon } from "./icons";
 /**
  * Sem mega-menu (só 5 cidades, ficaria vazio/pretensioso — ver CLAUDE.md) e
  * sem "Criar conta"/"Entrar" (sem contas de usuário na v1).
+ *
+ * Fundo navy = a cor de fundo real do Logotipo Oficial (não um branco
+ * genérico) — pedido explícito do usuário, ver CLAUDE.md.
  */
 const NAV_ITEMS = [
   { href: "/comprar", label: "Comprar" },
@@ -23,7 +26,7 @@ export function Header() {
   const [menuAberto, setMenuAberto] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-borda bg-white">
+    <header className="sticky top-0 z-40 bg-navy shadow-sm">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         <Link href="/" className="shrink-0">
           <Image
@@ -38,14 +41,14 @@ export function Header() {
 
         <nav aria-label="Navegação principal" className="hidden items-center gap-6 lg:flex">
           {NAV_ITEMS.map((item) => (
-            <Link key={item.href} href={item.href} className="text-sm text-texto-suave hover:text-navy">
+            <Link key={item.href} href={item.href} className="text-sm text-white/85 hover:text-dourado-light">
               {item.label}
             </Link>
           ))}
         </nav>
 
         <div className="hidden items-center gap-4 lg:flex">
-          <a href={`tel:${COMPANY.whatsapp}`} className="flex items-center gap-1 text-sm text-texto-suave hover:text-navy">
+          <a href={`tel:${COMPANY.whatsapp}`} className="flex items-center gap-1 text-sm text-white/85 hover:text-dourado-light">
             <PhoneIcon className="h-4 w-4" />
             {COMPANY.telefoneExibicao}
           </a>
@@ -69,21 +72,21 @@ export function Header() {
           aria-label="Abrir menu"
           className="flex flex-col gap-1.5 p-2 lg:hidden"
         >
-          <span className="h-0.5 w-6 bg-navy" />
-          <span className="h-0.5 w-6 bg-navy" />
-          <span className="h-0.5 w-6 bg-navy" />
+          <span className="h-0.5 w-6 bg-white" />
+          <span className="h-0.5 w-6 bg-white" />
+          <span className="h-0.5 w-6 bg-white" />
         </button>
       </div>
 
       {menuAberto && (
-        <nav id="menu-mobile" aria-label="Navegação móvel" className="border-t border-borda lg:hidden">
+        <nav id="menu-mobile" aria-label="Navegação móvel" className="border-t border-navy-light lg:hidden">
           <ul className="flex flex-col p-4">
             {NAV_ITEMS.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
                   onClick={() => setMenuAberto(false)}
-                  className="block py-2 text-texto-suave hover:text-navy"
+                  className="block py-2 text-white/85 hover:text-dourado-light"
                 >
                   {item.label}
                 </Link>
