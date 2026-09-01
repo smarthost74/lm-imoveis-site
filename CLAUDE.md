@@ -300,6 +300,39 @@ e foram corrigidos.
   ImobiBrasil sobre o feed `Carga`, independente do que acontecer com esse
   domínio.
 
+## Revisão pré-cutover (Etapa 7 — concluída)
+
+Relatório completo: `docs/etapa-7-revisao-pre-cutover.md`. Rodada contra
+build de produção local (`npm run build` + `npm run start`), já que o site
+ainda não está publicado — onde a ferramenta real exige URL pública
+(PageSpeed Insights, Rich Results Test por URL), usei o equivalente que
+aceita `localhost` ou código colado direto.
+
+- **JSON-LD**: validado no validator.schema.org e no Rich Results Test do
+  Google. **Achado real corrigido:** `address`/`floorSize`/`numberOfRooms`/
+  `numberOfBathroomsTotal` não são propriedades válidas de
+  `RealEstateListing` (é um tipo intangível) — schema.org acusava 4 avisos.
+  Agora ficam dentro de `about: { "@type": "Apartment" | "House" |
+  "Accommodation" }` em `lib/seo/jsonld.ts`. Resultado: 0 erros, 0 avisos
+  nos 3 schemas; Google confirmou 1 item válido de `BreadcrumbList`.
+- **Core Web Vitals mobile** (Lighthouse lab, não PageSpeed Insights real):
+  89/100 em home e imóvel, CLS perfeito (0) nas duas. LCP é o ponto mais
+  fraco (3.3–3.7s simulado) mas o elemento de LCP faz sentido em ambas
+  (headline do hero / foto principal da galeria) — não mudei código por
+  causa disso, métrica de lab em laptop de dev não é confiável o bastante
+  para guiar otimização; remedir com PageSpeed Insights real pós-lançamento.
+- **Acentuação**: 20 páginas reais baixadas do build de produção, zero
+  mojibake, 3.385 caracteres acentuados corretos confirmados (controle
+  positivo). Pipeline UTF-8 íntegro do feed até o HTML final.
+- **Redirects 301**: testadas as **370 URLs reais** do export do Search
+  Console (não amostra) via `scripts/test-all-redirects.mjs`. **Achado
+  real corrigido:** `/bairro/taubate/jardim-de-alah` redirecionava
+  incondicionalmente para uma página de bairro sem estoque hoje → 404. Um
+  301 nunca deve apontar para outro erro. `app/bairro/[cidade]/[bairro]`
+  (e a versão `/mobile/`) agora só aponta para `/imoveis/{cidade}/{bairro}`
+  quando há estoque ativo, senão cai em `/comprar/{cidade}`. Resultado
+  final: 370/370 sem erro, sem loop.
+
 ## Pipeline do feed (Etapa 3 — concluída)
 
 `scripts/fetch-feed.ts` é o job diário (agendar no cron do cPanel). Roda

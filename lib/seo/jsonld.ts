@@ -29,6 +29,20 @@ export function realEstateAgentJsonLd() {
   };
 }
 
+/**
+ * schema.org não reconhece `address`/`floorSize`/`numberOfRooms`/
+ * `numberOfBathroomsTotal` como propriedades diretas de `RealEstateListing`
+ * (é um tipo "Listing", intangível — validado no validator.schema.org,
+ * gerava 4 avisos). Esses atributos físicos pertencem a uma entidade de
+ * acomodação, referenciada via `about`.
+ */
+function tipoImovelToSchemaType(tipoImovel: string): string {
+  const t = tipoImovel.toLowerCase();
+  if (t.includes("apartamento")) return "Apartment";
+  if (t.includes("casa") || t.includes("sobrado")) return "House";
+  return "Accommodation";
+}
+
 export function realEstateListingJsonLd(listing: Listing, urlPagina: string) {
   const preco = listing.finalidade === "venda" ? listing.precoVenda : listing.precoLocacao;
   return {
@@ -40,21 +54,24 @@ export function realEstateListingJsonLd(listing: Listing, urlPagina: string) {
     datePosted: listing.atualizadoEm,
     // localPath é relativo (precisa do SITE_URL); sourceUrl já vem absoluto do feed.
     image: listing.fotos.map((f) => (f.localPath ? `${SITE_URL}${f.localPath}` : f.sourceUrl)),
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: `${listing.endereco}, ${listing.numero}`,
-      addressLocality: listing.cidade,
-      addressRegion: listing.uf,
-      postalCode: listing.cep,
-      addressCountry: "BR",
+    about: {
+      "@type": tipoImovelToSchemaType(listing.tipoImovel),
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: `${listing.endereco}, ${listing.numero}`,
+        addressLocality: listing.cidade,
+        addressRegion: listing.uf,
+        postalCode: listing.cep,
+        addressCountry: "BR",
+      },
+      floorSize: {
+        "@type": "QuantitativeValue",
+        value: listing.areaTotal ?? listing.areaUtil,
+        unitCode: "MTK",
+      },
+      numberOfRooms: listing.qtdDormitorios,
+      numberOfBathroomsTotal: listing.qtdBanheiros,
     },
-    floorSize: {
-      "@type": "QuantitativeValue",
-      value: listing.areaTotal ?? listing.areaUtil,
-      unitCode: "MTK",
-    },
-    numberOfRooms: listing.qtdDormitorios,
-    numberOfBathroomsTotal: listing.qtdBanheiros,
     ...(preco !== undefined
       ? {
           offers: {
