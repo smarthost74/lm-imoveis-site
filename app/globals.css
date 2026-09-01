@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+/*
+  Identidade visual da Lobato & Moraes Imóveis — ver briefing/CLAUDE.md.
+  Paleta e tipografia são decisão já fechada, não redesenhar aqui.
+*/
+:root {
+  --color-navy: #1b2a4a;
+  --color-navy-light: #2a3d63;
+  --color-dourado: #c9a84c;
+  --color-dourado-light: #ddc178;
+  --color-creme: #f5f2ea;
+  --color-branco: #ffffff;
+  --color-texto: #1f1f1f;
+  --color-texto-suave: #5a5a5a;
+  --color-borda: #e2ddd0;
+
+  --background: var(--color-creme);
+  --foreground: var(--color-texto);
+}
+
+@theme inline {
+  --color-navy: var(--color-navy);
+  --color-navy-light: var(--color-navy-light);
+  --color-dourado: var(--color-dourado);
+  --color-dourado-light: var(--color-dourado-light);
+  --color-creme: var(--color-creme);
+  --color-borda: var(--color-borda);
+  --color-texto-suave: var(--color-texto-suave);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-display: var(--font-playfair);
+  --font-sans: var(--font-dm-sans);
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display), Georgia, serif;
+}
+
+/* Piso não negociável: foco de teclado sempre visível */
+:focus-visible {
+  outline: 2px solid var(--color-dourado);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

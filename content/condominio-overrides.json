@@ -1,0 +1,10 @@
+{
+  "_comment": "Tabela manual CodigoImovel -> condominio. Pre-preenchida com sugestoes heuristicas de docs/feed-analysis.md (secao 5) a partir de Observacao/TituloImovel. PRECISA de confirmacao humana antes de qualquer pagina de condominio ser gerada a partir daqui.",
+  "overrides": [
+    { "codigoImovel": "APVE052_2-4359855", "condominio": "Residencial MOB", "confirmado": false, "origem": "Observacao" },
+    { "codigoImovel": "APVE054_2-4368863", "condominio": "Condomínio Cyan", "confirmado": false, "origem": "TituloImovel" },
+    { "codigoImovel": "APVE055_2-4368917", "condominio": "Village Towers", "confirmado": false, "origem": "Observacao" },
+    { "codigoImovel": "APVE057_2-4369235", "condominio": "Edifício Europa", "confirmado": false, "origem": "Observacao" },
+    { "codigoImovel": "APVE061_2-4386569", "condominio": "Edifício Des Arts", "confirmado": false, "origem": "Observacao" }
+  ]
+}
