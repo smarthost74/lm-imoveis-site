@@ -20,7 +20,7 @@ export const CHARACTERISTIC_MAP: Record<CharacteristicKey, CharacteristicInfo> =
   Clube: { key: "Clube", label: "Clube", group: "lazer_condominio" },
   AreaLazer: { key: "AreaLazer", label: "Área de lazer", group: "lazer_condominio" },
   EspacoGourmet: { key: "EspacoGourmet", label: "Espaço gourmet", group: "lazer_condominio" },
-  Restaurante: { key: "Restaurante", label: "Restaurante no condomínio", group: "lazer_condominio" },
+  Restaurante: { key: "Restaurante", label: "Restaurante", group: "lazer_condominio" },
 
   // Acabamento do imóvel
   VarandaGourmet: { key: "VarandaGourmet", label: "Varanda gourmet", group: "acabamento_imovel" },

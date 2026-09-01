@@ -16,6 +16,7 @@ export function BrokerCard({
   telefone,
   whatsapp,
   mensagemWhatsapp,
+  textoBotaoWhatsapp = "Converse sobre esse imóvel através do WhatsApp",
   sticky = false,
 }: {
   nome: string;
@@ -23,6 +24,7 @@ export function BrokerCard({
   telefone: string;
   whatsapp: string;
   mensagemWhatsapp: string;
+  textoBotaoWhatsapp?: string;
   sticky?: boolean;
 }) {
   return (
@@ -40,7 +42,7 @@ export function BrokerCard({
         className="mt-4 flex w-full items-center justify-center gap-2 rounded bg-[#25D366] px-4 py-3 font-medium text-white transition-colors hover:brightness-95"
       >
         <WhatsappIcon className="h-5 w-5" />
-        Falar no WhatsApp
+        {textoBotaoWhatsapp}
       </a>
 
       <a

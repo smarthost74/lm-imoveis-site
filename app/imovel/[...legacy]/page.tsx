@@ -59,8 +59,12 @@ export default async function ImovelPage({ params }: { params: Promise<{ legacy:
 function ImovelDetalhe({ listing, id }: { listing: NonNullable<ReturnType<typeof getListingByNumericId>>; id: string }) {
   const indisponivel = listing.status === "indisponivel";
   const grupos = groupCharacteristics(listing.caracteristicas);
-  const semelhantes = getListingsSemelhantes(listing);
-  const enderecoCompleto = `${listing.endereco}, ${listing.numero} - ${listing.bairro}, ${listing.cidade}/${listing.uf}`;
+  const { mesmoCondominio, mesmoBairro } = getListingsSemelhantes(listing);
+  // Rua/número não aparecem na página nem no mapa — só bairro/cidade
+  // (localização aproximada, pedido explícito do usuário). O endereço
+  // completo ainda vai na mensagem de WhatsApp (uso interno do corretor).
+  const enderecoAproximado = `${listing.bairro}, ${listing.cidade}/${listing.uf}`;
+  const enderecoCompleto = `${listing.endereco}, ${listing.numero} - ${enderecoAproximado}`;
   const urlPagina = `${SITE_URL}/imovel/${id}/${listing.slug}`;
   const mensagemWhatsapp = `Olá! Tenho interesse no imóvel ${listing.titulo} (código ${listing.codigoImovel}), em ${enderecoCompleto}. ${urlPagina}`;
 
@@ -114,7 +118,7 @@ function ImovelDetalhe({ listing, id }: { listing: NonNullable<ReturnType<typeof
           )}
 
           <h1 className="font-display text-2xl text-navy sm:text-3xl">{listing.titulo}</h1>
-          <p className="mt-1 text-texto-suave">{enderecoCompleto}</p>
+          <p className="mt-1 text-texto-suave">{enderecoAproximado}</p>
 
           <p className="mt-4 font-display text-3xl text-navy">
             {listing.finalidade === "venda" && listing.precoVenda !== undefined
@@ -137,7 +141,7 @@ function ImovelDetalhe({ listing, id }: { listing: NonNullable<ReturnType<typeof
               origem="imovel-mobile-cta"
               className="mt-4 inline-flex items-center gap-2 rounded bg-[#25D366] px-5 py-3 font-medium text-white hover:brightness-95 lg:hidden"
             >
-              Falar no WhatsApp sobre este imóvel
+              Converse sobre esse imóvel através do WhatsApp
             </WhatsappCtaLink>
           )}
 
@@ -167,7 +171,8 @@ function ImovelDetalhe({ listing, id }: { listing: NonNullable<ReturnType<typeof
                 {grupos.map((g) => (
                   <div key={g.group}>
                     <h3 className="mb-2 text-sm font-medium uppercase tracking-wide text-texto-suave">
-                      {g.groupLabel}
+                      {/* Sem condomínio, "Lazer do condomínio" não faz sentido — ver CLAUDE.md */}
+                      {g.group === "lazer_condominio" && !listing.condominio ? "Lazer e proximidades" : g.groupLabel}
                     </h3>
                     <ul className="flex flex-col gap-1 text-sm text-navy">
                       {g.items.map((item) => (
@@ -191,13 +196,16 @@ function ImovelDetalhe({ listing, id }: { listing: NonNullable<ReturnType<typeof
 
           <section className="mt-8">
             <h2 className="mb-3 font-display text-xl text-navy">Localização</h2>
+            <p className="mb-3 text-sm text-texto-suave">
+              Localização aproximada — o endereço completo é informado pelo corretor.
+            </p>
             <div className="aspect-video overflow-hidden rounded-lg border border-borda">
               <iframe
-                title={`Mapa de ${enderecoCompleto}`}
+                title={`Mapa aproximado de ${enderecoAproximado}`}
                 width="100%"
                 height="100%"
                 loading="lazy"
-                src={`https://www.google.com/maps?q=${encodeURIComponent(enderecoCompleto)}&output=embed`}
+                src={`https://www.google.com/maps?q=${encodeURIComponent(enderecoAproximado)}&output=embed`}
               />
             </div>
           </section>
@@ -214,16 +222,22 @@ function ImovelDetalhe({ listing, id }: { listing: NonNullable<ReturnType<typeof
         </div>
       </div>
 
-      {semelhantes.length > 0 && (
+      {mesmoCondominio.length > 0 && (
         <section className="mt-16">
-          <h2 className="mb-6 font-display text-2xl text-navy">
-            Imóveis semelhantes{" "}
-            {semelhantes.some((l) => l.condominio && l.condominio === listing.condominio)
-              ? "no mesmo condomínio"
-              : "no mesmo bairro"}
-          </h2>
+          <h2 className="mb-6 font-display text-2xl text-navy">Imóveis no mesmo condomínio</h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {semelhantes.map((l) => (
+            {mesmoCondominio.map((l) => (
+              <ImovelCard key={l.codigoImovel} listing={l} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {mesmoBairro.length > 0 && (
+        <section className="mt-16">
+          <h2 className="mb-6 font-display text-2xl text-navy">Imóveis no mesmo bairro</h2>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {mesmoBairro.map((l) => (
               <ImovelCard key={l.codigoImovel} listing={l} />
             ))}
           </div>

@@ -119,14 +119,20 @@ export function getListingsByCondominio(cidade: string, condominioSlug: string):
   );
 }
 
-export function getListingsSemelhantes(listing: Listing, limit = 4): Listing[] {
+/** Duas listas separadas (não uma mesclada) — a página de imóvel mostra "mesmo condomínio" e "mesmo bairro" como seções distintas. */
+export function getListingsSemelhantes(
+  listing: Listing,
+  limit = 4
+): { mesmoCondominio: Listing[]; mesmoBairro: Listing[] } {
   const mesmoCondominio = listing.condominio
-    ? getActiveListings().filter(
-        (l) => l.codigoImovel !== listing.codigoImovel && l.condominio === listing.condominio
-      )
+    ? getActiveListings()
+        .filter((l) => l.codigoImovel !== listing.codigoImovel && l.condominio === listing.condominio)
+        .slice(0, limit)
     : [];
-  const mesmoBairro = getActiveListings().filter(
-    (l) => l.codigoImovel !== listing.codigoImovel && l.bairro === listing.bairro && l.condominio !== listing.condominio
-  );
-  return [...mesmoCondominio, ...mesmoBairro].slice(0, limit);
+  const mesmoBairro = getActiveListings()
+    .filter(
+      (l) => l.codigoImovel !== listing.codigoImovel && l.bairro === listing.bairro && l.condominio !== listing.condominio
+    )
+    .slice(0, limit);
+  return { mesmoCondominio, mesmoBairro };
 }
