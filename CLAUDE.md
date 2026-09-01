@@ -81,12 +81,18 @@ Ver `docs/feed-analysis.md` para a validação completa contra o catálogo real
 - **Sem corretor por imóvel no feed.** v1: WhatsApp/telefone sempre da
   imobiliária (fallback vira regra). Campo `corretor` no tipo `Listing`
   já existe como ponto de extensão para quando/se isso mudar.
-- **Sem campo de condomínio no feed.** Extração heurística de `Observacao`/
-  `TituloImovel` acerta ~57–70% — não confiável como fonte única. v1 usa
-  `content/condominio-overrides.json`, tabela manual pré-preenchida com as
-  sugestões heurísticas, **não confirmadas** (`"confirmado": false`) até
-  revisão humana. Nenhuma página de condomínio deve ser gerada a partir de
-  uma entrada não confirmada.
+- **Sem campo de condomínio no feed.** A Etapa 1 tentou extração heurística
+  genérica em `Observacao`/`TituloImovel` (~57%). A Etapa 3 achou um sinal
+  bem mais forte: a primeira frase de `Observacao` segue um template fixo
+  da ImobiBrasil (`"{Tipo} à venda ..., no {Bairro}, no {Condomínio}, na
+  {Endereco}."`) — `lib/feed/extract-condominio.ts` extrai daí e acerta 6 de
+  7 imóveis com texto (a casa em bairro aberto corretamente não tem
+  candidato). Ainda assim é heurística, não garantia. v1 usa
+  `content/condominio-overrides.json`, tabela pré-preenchida com esses
+  candidatos, **não confirmados** (`"confirmado": false`) até revisão
+  humana — `getConfirmedCondominio()` só retorna o nome quando `confirmado:
+  true`. Nenhuma página de condomínio deve ser gerada a partir de uma
+  entrada não confirmada.
 - **`TipoOferta` (valores 1/2 observados): significado não confirmado.** Não
   usar em filtro/exibição até esclarecer com a ImobiBrasil ou o CRM. Campo
   preservado como `tipoOfertaRaw` no tipo `Listing`.
@@ -127,17 +133,24 @@ app/                      App Router — páginas e rotas (Etapa 5 preenche)
   page.tsx                home (placeholder até Etapa 5)
 lib/
   feed/
-    types.ts              modelo de dados TypeScript do feed Carga
-    characteristics-map.ts dicionário tag -> {label, grupo}
-    parser.ts              (Etapa 3) parser do XML -> ParsedFeed
-    sanitize-description.ts (Etapa 3) split/limpeza de Observacao
-  format.ts               formatação de moeda/área, cálculo de custo mensal
+    types.ts                 modelo de dados TypeScript do feed Carga
+    characteristics-map.ts   dicionário tag -> {label, grupo}
+    parser.ts                parseCargaXml(xml) -> ParsedFeed
+    sanitize-description.ts  split/limpeza de Observacao em blocos
+    extract-condominio.ts    heurística de nome de condomínio (ver acima)
+    condominio-overrides.ts  lê content/condominio-overrides.json
+    slug.ts                  slugify, extractNumericId, buildListingSlug
+    store.ts                 persistência em data/listings.json (upsert + indisponivel)
+    images.ts                download/re-hospedagem em public/imoveis-cache
+  format.ts                  formatação de moeda/área, cálculo de custo mensal
 content/
   condominio-overrides.json  tabela manual CodigoImovel -> condomínio
-components/               (Etapa 4) os 8 componentes do design system
+components/                  (Etapa 4) os 8 componentes do design system
 scripts/
-  analyze-feed.mjs        script de análise usado na Etapa 1 (não é pipeline)
-  fetch-feed.mjs          (Etapa 3) job diário: baixa feed, cai para cache se falhar
+  analyze-feed.mjs         script de análise usado na Etapa 1 (não é pipeline)
+  fetch-feed.ts            entrypoint do job diário — `node --env-file=.env scripts/fetch-feed.ts`
+  test-*.mjs               scripts de verificação manual do pipeline, não é suíte formal de testes
+data/                      (gerado, fora do Git) feed-cache.xml + listings.json
 docs/
   feed-analysis.md        relatório de validação do feed (Etapa 1)
   feed-carga-raw.xml      cópia local do feed real baixado em 01/09/2026
@@ -145,13 +158,33 @@ docs/
 .claude/launch.json       config do dev server para o preview do Claude Code
 ```
 
+## Pipeline do feed (Etapa 3 — concluída)
+
+`scripts/fetch-feed.ts` é o job diário (agendar no cron do cPanel). Roda
+direto via `node` — **não precisa de build nem de `tsx`**: Node 24 executa
+TypeScript nativamente (type stripping), por isso todo import relativo entre
+arquivos de `lib/feed/*.ts` usa extensão `.ts` explícita (exigência do
+resolvedor ESM nativo do Node; o bundler do Next resolve normalmente sem
+extensão nos imports do próprio app, então isso não afeta o app).
+
+Fluxo: baixa o XML → se falhar (rede/TLS) ou vier inválido, cai para
+`data/feed-cache.xml` (último válido) → parseia → funde no store
+(`data/listings.json`; imóvel que sai do feed vira `"indisponivel"`, nunca
+é apagado) → baixa/re-hospeda fotos novas em `public/imoveis-cache/`
+(idempotente, pula o que já existe) → loga características sem mapeamento
+em `characteristics-map.ts`.
+
+Testado ponta a ponta em 01/09/2026 contra o feed real, incluindo o cenário
+de falha real (certificado expirado no momento do teste) — o fallback para
+cache funcionou como projetado, sem exceção não tratada.
+
 ## Segurança
 
 - Credenciais/URLs com token (`FEED_CARGA_URL`) sempre em variável de
   ambiente — nunca hardcoded, nunca commitado. `.env.example` documenta as
   chaves esperadas sem valores reais.
 - `.gitignore` cobre `.env*`, `node_modules`, `.next`, `out`, cache de
-  imagens (`/public/imoveis-cache/`, path reservado para a Etapa 3).
+  imagens (`/public/imoveis-cache/`) e o store gerado (`/data/`).
 - Downloads de feed/imagens em produção via HTTPS; se o certificado do
   domínio de origem expirar de novo, o pipeline deve falhar de forma visível
   (não silenciar o erro de TLS) e cair para o cache.
@@ -165,17 +198,19 @@ docs/
   do zero a partir do feed correto. Não usar nenhum arquivo/decisão anterior
   a esse commit como referência de schema.
 - Em 01/09/2026 o certificado SSL de `lobatoemoraesimoveis.com.br` estava
-  expirado no momento da análise do feed. O usuário confirmou que já está
-  sendo resolvido — não é uma pendência deste projeto, só não usar isso como
-  sinal de que o pipeline de download está quebrado se aparecer de novo.
+  expirado (confirmado de novo às 15:42 UTC do mesmo dia, durante o teste
+  ponta a ponta da Etapa 3 — ainda expirado nesse momento). O usuário disse
+  que já está sendo resolvido — não é uma pendência deste projeto. Não usar
+  isso como sinal de que o pipeline de download está quebrado se o fetch
+  falhar de novo; primeiro checar o certificado.
 
 ## Pendências abertas (não bloqueiam trabalho, mas afetam decisões futuras)
 
 1. Confirmar se o catálogo de 8 imóveis é a carteira ativa completa ou se há
    mais estoque fora do feed.
 2. Significado de `TipoOferta` (valores 1/2).
-3. Confirmar/corrigir as 5 sugestões de condomínio em
-   `content/condominio-overrides.json` antes de gerar qualquer página de
-   condomínio a partir delas.
+3. Confirmar/corrigir as 6 sugestões de condomínio em
+   `content/condominio-overrides.json` (candidatos mais fortes desde a
+   Etapa 3) antes de gerar qualquer página de condomínio a partir delas.
 4. Sem dado de locação no feed hoje — decidir se a aba "Alugar" da busca fica
    visível vazia (com estado vazio elegante) ou oculta até existir estoque.
