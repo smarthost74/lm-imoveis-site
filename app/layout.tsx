@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, DM_Sans } from "next/font/google";
+import { Montserrat, Poppins } from "next/font/google";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
@@ -7,15 +7,24 @@ import { realEstateAgentJsonLd } from "@/lib/seo/jsonld";
 import { SITE_URL } from "@/lib/company";
 import "./globals.css";
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
+/**
+ * Montserrat + Poppins — não Playfair Display/DM Sans do briefing inicial.
+ * Confirmado como a tipografia real da marca a partir dos arquivos da
+ * própria imobiliária (Villa Mozart, um dos lançamentos, usa exatamente
+ * essas duas famílias — 01/09/2026). Pedido explícito do usuário: fontes
+ * sans-serif, não a serifada original.
+ */
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
+  weight: ["600", "700"],
   display: "swap",
 });
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
   display: "swap",
 });
 
@@ -33,7 +42,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="pt-BR"
-      className={`${playfair.variable} ${dmSans.variable} h-full antialiased`}
+      className={`${montserrat.variable} ${poppins.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-creme text-foreground">
         <script
