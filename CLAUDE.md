@@ -248,6 +248,40 @@ nunca concatenar `" | Lobato & Moraes Imóveis"` manualmente, porque
 já apareceram uma vez nesta etapa (título "em taubate" e sufixo duplicado)
 e foram corrigidos.
 
+## SEO técnico (Etapa 6 — concluída, exceto redirects 301)
+
+- **JSON-LD** (`lib/seo/jsonld.ts`): `RealEstateAgent` em todo layout (NAP +
+  `sameAs` com redes sociais e os dois lançamentos), `RealEstateListing` +
+  `BreadcrumbList` na página de imóvel. **Sem `geo`** em nenhum schema — o
+  feed não tem lat/long e não há geocodificação implementada; não publicar
+  coordenada inventada. Retomar quando houver geocodificação por endereço.
+  Cuidado já corrigido uma vez: `image` do `RealEstateListing` usa
+  `f.localPath` (relativo, precisa de `SITE_URL` na frente) OU `f.sourceUrl`
+  (já absoluto do feed) — nunca concatenar `SITE_URL` com `sourceUrl`.
+- **Sitemap** (`app/sitemap.ts`) e **robots.txt** (`app/robots.ts`), via API
+  nativa do Next — cobrem home, institucionais, todo imóvel ativo, toda
+  página de bairro/condomínio com estoque e toda combinação tipo+finalidade+
+  cidade realmente presente no catálogo (não gera URL para combinação sem
+  imóvel). `/demo-componentes` e `/api/` bloqueados no robots.
+- **GA4** (`components/GoogleAnalytics.tsx`): só renderiza script se
+  `NEXT_PUBLIC_GA4_MEASUREMENT_ID` estiver configurado. Evento
+  `generate_lead` (`lib/analytics.ts` → `trackLeadEvent`) disparado em
+  **todo** clique de WhatsApp (header desktop/mobile, card do corretor,
+  CTA de contato, botão mobile da página de imóvel via
+  `components/WhatsappCtaLink.tsx`) e no envio bem-sucedido do formulário.
+- **`/api/leads`** (`app/api/leads/route.ts`): honeypot revalidado no
+  servidor, rate limit em memória (5/min por IP — aceitável para instância
+  única, reseta a cada restart). Envia e-mail via `nodemailer` usando
+  `SMTP_HOST`/`SMTP_USER`/`SMTP_PASS`/`LEADS_EMAIL_FROM` (variáveis novas em
+  `.env.example`). **Sem essas variáveis configuradas, a rota loga o lead e
+  retorna 503 — nunca finge sucesso.** Testado local: com SMTP vazio, o
+  formulário mostra o erro corretamente e sugere o WhatsApp.
+- **Redirects 301 do domínio antigo: não implementados ainda.** Dependem do
+  inventário de URLs indexadas do Search Console (briefing seção 5) — sem
+  isso não dá para saber quais URLs do site atual e do domínio
+  `fernandomoraesimoveis.com.br` precisam de destino. Pendência registrada
+  abaixo.
+
 ## Pipeline do feed (Etapa 3 — concluída)
 
 `scripts/fetch-feed.ts` é o job diário (agendar no cron do cPanel). Roda
@@ -304,5 +338,11 @@ cache funcionou como projetado, sem exceção não tratada.
    Etapa 3) antes de gerar qualquer página de condomínio a partir delas.
 4. Sem dado de locação no feed hoje — decidir se a aba "Alugar" da busca fica
    visível vazia (com estado vazio elegante) ou oculta até existir estoque.
-
-<!-- END:nextjs-agent-rules -->
+5. **Redirects 301 do site atual e do domínio antigo** (`fernandomoraesimoveis.com.br`)
+   não implementados — precisa do inventário de URLs indexadas do Search
+   Console (briefing seção 5) antes de mapear origem → destino.
+6. Credenciais de SMTP para o envio de e-mail de leads (`SMTP_HOST` etc. em
+   `.env.example`) ainda não configuradas em nenhum ambiente — sem isso,
+   `/api/leads` loga o lead mas não envia (retorna 503 de propósito).
+7. `NEXT_PUBLIC_GA4_MEASUREMENT_ID` ainda não configurado — sem ele, o script
+   do GA4 simplesmente não renderiza (comportamento esperado, não é bug).

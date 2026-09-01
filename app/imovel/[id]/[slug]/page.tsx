@@ -3,12 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Gallery } from "@/components/Gallery";
 import { BrokerCard } from "@/components/BrokerCard";
+import { WhatsappCtaLink } from "@/components/WhatsappCtaLink";
 import { ImovelCard } from "@/components/ImovelCard";
 import { getListingByNumericId, getListingsSemelhantes } from "@/lib/data";
 import { groupCharacteristics } from "@/lib/feed/characteristics-map";
 import { formatArea, formatCurrency } from "@/lib/format";
 import { slugify } from "@/lib/feed/slug";
 import { buildWhatsappLink, COMPANY, SITE_URL } from "@/lib/company";
+import { breadcrumbJsonLd, realEstateListingJsonLd } from "@/lib/seo/jsonld";
 
 /**
  * Landing page de conversão, não ficha de catálogo (ver briefing seção
@@ -45,8 +47,30 @@ export default async function ImovelPage({
   const urlPagina = `${SITE_URL}/imovel/${id}/${listing.slug}`;
   const mensagemWhatsapp = `Olá! Tenho interesse no imóvel ${listing.titulo} (código ${listing.codigoImovel}), em ${enderecoCompleto}. ${urlPagina}`;
 
+  const breadcrumbItems = [
+    { nome: "Home", url: SITE_URL },
+    {
+      nome: listing.finalidade === "venda" ? "Comprar" : "Alugar",
+      url: `${SITE_URL}/${listing.finalidade === "venda" ? "comprar" : "alugar"}`,
+    },
+    {
+      nome: listing.bairro,
+      url: `${SITE_URL}/imoveis/${slugify(listing.cidade)}/${slugify(listing.bairro)}`,
+    },
+    { nome: listing.titulo, url: urlPagina },
+  ];
+
   return (
     <main className="mx-auto max-w-6xl px-4 pb-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(realEstateListingJsonLd(listing, urlPagina)) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(breadcrumbItems)) }}
+      />
+
       <nav aria-label="Breadcrumb" className="py-4 text-sm text-texto-suave">
         <Link href="/" className="hover:text-navy">Home</Link>
         {" / "}
@@ -91,14 +115,13 @@ export default async function ImovelPage({
           )}
 
           {!indisponivel && (
-            <a
+            <WhatsappCtaLink
               href={buildWhatsappLink({ telefone: listing.corretor.whatsapp, mensagem: mensagemWhatsapp })}
-              target="_blank"
-              rel="noopener noreferrer"
+              origem="imovel-mobile-cta"
               className="mt-4 inline-flex items-center gap-2 rounded bg-[#25D366] px-5 py-3 font-medium text-white hover:brightness-95 lg:hidden"
             >
               Falar no WhatsApp sobre este imóvel
-            </a>
+            </WhatsappCtaLink>
           )}
 
           <dl className="mt-6 grid grid-cols-2 gap-4 rounded-lg border border-borda bg-white p-5 sm:grid-cols-5">

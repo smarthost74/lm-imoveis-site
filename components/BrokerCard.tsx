@@ -1,4 +1,7 @@
+"use client";
+
 import { buildWhatsappLink } from "@/lib/company";
+import { trackLeadEvent } from "@/lib/analytics";
 import { WhatsappIcon, PhoneIcon } from "./icons";
 
 /**
@@ -33,6 +36,7 @@ export function BrokerCard({
         href={buildWhatsappLink({ telefone: whatsapp, mensagem: mensagemWhatsapp })}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={() => trackLeadEvent("whatsapp", { origem: "broker-card" })}
         className="mt-4 flex w-full items-center justify-center gap-2 rounded bg-[#25D366] px-4 py-3 font-medium text-white transition-colors hover:brightness-95"
       >
         <WhatsappIcon className="h-5 w-5" />

@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { buildWhatsappLink } from "@/lib/company";
+import { trackLeadEvent } from "@/lib/analytics";
 import { WhatsappIcon } from "./icons";
 
 /**
@@ -44,6 +45,7 @@ export function ContactCta({
       });
       if (!res.ok) throw new Error("falha no envio");
       setStatus("sucesso");
+      trackLeadEvent("formulario", { contexto });
       form.reset();
     } catch {
       setStatus("erro");
@@ -56,6 +58,7 @@ export function ContactCta({
         href={buildWhatsappLink({ telefone, mensagem: mensagemWhatsapp })}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={() => trackLeadEvent("whatsapp", { origem: contexto ?? "contact-cta" })}
         className="flex w-full items-center justify-center gap-2 rounded bg-[#25D366] px-4 py-3 font-medium text-white transition-colors hover:brightness-95"
       >
         <WhatsappIcon className="h-5 w-5" />

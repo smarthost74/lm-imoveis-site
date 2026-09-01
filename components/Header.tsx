@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { COMPANY } from "@/lib/company";
+import { trackLeadEvent } from "@/lib/analytics";
 import { PhoneIcon, WhatsappIcon } from "./icons";
 
 /**
@@ -52,6 +53,7 @@ export function Header() {
             href={`https://wa.me/${COMPANY.whatsapp}`}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackLeadEvent("whatsapp", { origem: "header" })}
             className="flex items-center gap-2 rounded bg-[#25D366] px-3 py-2 text-sm font-medium text-white hover:brightness-95"
           >
             <WhatsappIcon className="h-4 w-4" />
@@ -92,6 +94,7 @@ export function Header() {
                 href={`https://wa.me/${COMPANY.whatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => trackLeadEvent("whatsapp", { origem: "header-mobile" })}
                 className="mt-2 flex items-center justify-center gap-2 rounded bg-[#25D366] px-3 py-2 font-medium text-white"
               >
                 <WhatsappIcon className="h-4 w-4" />
