@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ListagemImoveis } from "@/app/_shared/ListagemImoveis";
+import { ListagemImoveis, type RawSearchParams } from "@/app/_shared/ListagemImoveis";
 import { parseTipoFinalidadeCidadeSlug } from "@/lib/routes";
 import { getActiveListings, resolveCidadeNome } from "@/lib/data";
 import { slugify } from "@/lib/feed/slug";
@@ -34,7 +34,7 @@ export default async function TipoFinalidadeCidadePage({
   searchParams,
 }: {
   params: Promise<{ tipoFinalidadeCidade: string }>;
-  searchParams: Promise<Record<string, string | undefined>>;
+  searchParams: Promise<RawSearchParams>;
 }) {
   const { tipoFinalidadeCidade } = await params;
   const sp = await searchParams;

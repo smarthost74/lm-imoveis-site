@@ -1,16 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Listing } from "@/lib/feed/types";
-import { formatArea, formatCurrency } from "@/lib/format";
+import { formatArea, formatCurrency, formatCurrencyPerM2 } from "@/lib/format";
 import { extractNumericId } from "@/lib/feed/slug";
 import { BedIcon, CarIcon, AreaIcon } from "./icons";
 
 /**
  * Card de imóvel — o componente mais reutilizado do site (centenas de
  * instâncias entre home, listagens, bairro/condomínio, "semelhantes").
- * Precisa suportar: preço de venda ou locação (+ custo mensal), estado
- * "indisponível" (imóvel vendido/alugado, fora do feed) e slot opcional
- * para R$/m² (v2 — não exibido ainda, ver `precoPorM2` em lib/feed/types.ts).
+ * Precisa suportar: preço de venda (+ R$/m², calculado) ou locação (+ custo
+ * mensal) e estado "indisponível" (imóvel vendido/alugado, fora do feed).
  */
 export function ImovelCard({ listing }: { listing: Listing }) {
   const capa = listing.fotos.find((f) => f.isPrimary) ?? listing.fotos[0];
@@ -53,6 +52,11 @@ export function ImovelCard({ listing }: { listing: Listing }) {
         {listing.finalidade === "locacao" && listing.precoLocacao !== undefined && (
           <p className="text-xs text-texto-suave">
             aluguel {formatCurrency(listing.precoLocacao)} + condomínio e IPTU
+          </p>
+        )}
+        {listing.finalidade === "venda" && listing.precoVenda !== undefined && (
+          <p className="text-xs text-texto-suave">
+            {formatCurrencyPerM2(listing.precoVenda, listing.areaTotal ?? listing.areaUtil)}
           </p>
         )}
 

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ListagemImoveis } from "@/app/_shared/ListagemImoveis";
+import { ListagemImoveis, type RawSearchParams } from "@/app/_shared/ListagemImoveis";
 import { resolveCidadeNome } from "@/lib/data";
 
 export async function generateMetadata({
@@ -16,7 +16,7 @@ export default async function AlugarPage({
   searchParams,
 }: {
   params: Promise<{ cidade: string }>;
-  searchParams: Promise<Record<string, string | undefined>>;
+  searchParams: Promise<RawSearchParams>;
 }) {
   const { cidade } = await params;
   const sp = await searchParams;
