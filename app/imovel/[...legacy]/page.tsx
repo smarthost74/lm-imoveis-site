@@ -1,29 +1,41 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 import { Gallery } from "@/components/Gallery";
 import { BrokerCard } from "@/components/BrokerCard";
 import { WhatsappCtaLink } from "@/components/WhatsappCtaLink";
 import { ImovelCard } from "@/components/ImovelCard";
-import { getListingByNumericId, getListingsSemelhantes } from "@/lib/data";
+import { getListingByNumericId, getListingsSemelhantes, bairroExiste } from "@/lib/data";
 import { groupCharacteristics } from "@/lib/feed/characteristics-map";
 import { formatArea, formatCurrency } from "@/lib/format";
 import { slugify } from "@/lib/feed/slug";
 import { buildWhatsappLink, COMPANY, SITE_URL } from "@/lib/company";
 import { breadcrumbJsonLd, realEstateListingJsonLd } from "@/lib/seo/jsonld";
+import { resolveLegacyImovelPath } from "@/lib/routes";
 
 /**
- * Landing page de conversão, não ficha de catálogo (ver briefing seção
- * 3.1): um CTA primário (WhatsApp do corretor), tudo acima da dobra
- * permite decisão sem rolar a página.
+ * Rota única para /imovel/*: cobre tanto a URL nova de imóvel individual
+ * (`/imovel/{id}/{slug}`, preservada do site antigo — ver briefing seção 5)
+ * quanto todo padrão legado indexado no Search Console em 01/09/2026
+ * (`/imovel/{finalidade}/...`, `/imovel/{id}/{slug-antigo-fora-do-feed}`).
+ * Um catch-all (`[...legacy]`) e um segmento dinâmico nomeado (`[id]`) não
+ * podem coexistir como irmãos no mesmo nível de rota no Next.js — por isso
+ * as duas responsabilidades ficam juntas aqui em vez de em arquivos
+ * separados. Ver docs/redirects-301.md para o mapeamento completo.
  */
+
+function isPropertyIdShape(segments: string[]): boolean {
+  return segments.length >= 2 && /^\d+$/.test(segments[0]);
+}
+
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string; slug: string }>;
+  params: Promise<{ legacy: string[] }>;
 }): Promise<Metadata> {
-  const { id } = await params;
-  const listing = getListingByNumericId(id);
+  const { legacy } = await params;
+  if (!isPropertyIdShape(legacy)) return {};
+  const listing = getListingByNumericId(legacy[0]);
   if (!listing) return {};
   return {
     title: listing.titulo,
@@ -31,15 +43,20 @@ export async function generateMetadata({
   };
 }
 
-export default async function ImovelPage({
-  params,
-}: {
-  params: Promise<{ id: string; slug: string }>;
-}) {
-  const { id } = await params;
-  const listing = getListingByNumericId(id);
-  if (!listing) notFound();
+export default async function ImovelPage({ params }: { params: Promise<{ legacy: string[] }> }) {
+  const { legacy } = await params;
 
+  if (isPropertyIdShape(legacy)) {
+    const listing = getListingByNumericId(legacy[0]);
+    if (listing) return <ImovelDetalhe listing={listing} id={legacy[0]} />;
+  }
+
+  // Não é (ou não resolve para) um imóvel do feed atual — redirect 301 (308,
+  // equivalente para o Google) para o destino mais relevante possível.
+  permanentRedirect(resolveLegacyImovelPath(legacy, { bairroExiste, cidadePadrao: "taubate" }));
+}
+
+function ImovelDetalhe({ listing, id }: { listing: NonNullable<ReturnType<typeof getListingByNumericId>>; id: string }) {
   const indisponivel = listing.status === "indisponivel";
   const grupos = groupCharacteristics(listing.caracteristicas);
   const semelhantes = getListingsSemelhantes(listing);

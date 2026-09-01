@@ -67,6 +67,16 @@ export function getBairros(): BairroSummary[] {
   return [...map.values()].sort((a, b) => b.totalAtivos - a.totalAtivos);
 }
 
+/** Usado pelos redirects 301 legados (lib/routes.ts) para decidir se vale a pena apontar para a página de bairro. */
+export function bairroExiste(cidadeSlug: string, bairroSlug: string): boolean {
+  return getBairros().some((b) => slugify(b.cidade) === slugify(cidadeSlug) && b.slug === bairroSlug);
+}
+
+/** Idem para condomínio. */
+export function condominioExiste(cidadeSlug: string, condominioSlug: string): boolean {
+  return getCondominios().some((c) => slugify(c.cidade) === slugify(cidadeSlug) && c.slug === condominioSlug);
+}
+
 export function getListingsByBairro(cidade: string, bairroSlug: string): Listing[] {
   return getActiveListings().filter(
     (l) => slugify(l.cidade) === slugify(cidade) && slugify(l.bairro) === bairroSlug

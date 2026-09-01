@@ -276,11 +276,25 @@ e foram corrigidos.
   `.env.example`). **Sem essas variáveis configuradas, a rota loga o lead e
   retorna 503 — nunca finge sucesso.** Testado local: com SMTP vazio, o
   formulário mostra o erro corretamente e sugere o WhatsApp.
-- **Redirects 301 do domínio antigo: não implementados ainda.** Dependem do
-  inventário de URLs indexadas do Search Console (briefing seção 5) — sem
-  isso não dá para saber quais URLs do site atual e do domínio
-  `fernandomoraesimoveis.com.br` precisam de destino. Pendência registrada
-  abaixo.
+- **Redirects 301 do domínio atual: implementados** a partir do export real
+  do Search Console (01/09/2026, 370 URLs indexadas — ver
+  `docs/redirects-301.md` para o mapeamento completo e
+  `docs/search-console-lobatoemoraesimoveis-2026-09-01.csv` para o dado
+  bruto). Achado: **58% das URLs indexadas eram só duplicata `/mobile/`** e
+  **52% eram querystring de busca filtrada indexada por engano** — só 45
+  eram únicas de fato. Tudo em `lib/routes.ts`
+  (`resolveLegacyImovelPath`) + páginas dedicadas com `permanentRedirect()`
+  (308), nunca 404 para um padrão reconhecido (cascata: imóvel ainda ativo
+  → bairro com estoque → tipo+finalidade → fallback genérico).
+  `app/imovel/[...legacy]/page.tsx` acumula a página real de imóvel E o
+  resolver de legado — Next não permite `[id]` e `[...legacy]` como irmãos
+  no mesmo nível de rota.
+- **Redirects do domínio antigo `fernandomoraesimoveis.com.br`: pendentes.**
+  Falta o export do Search Console desse domínio (mesmo processo, ver
+  `docs/redirects-301.md` seção Pendências). A URL
+  `/empreendimento/{slug}/{uf}/{cidade}/{id}` desse domínio confirma que a
+  ImobiBrasil já teve dado estruturado de condomínio no CRM — vale
+  perguntar de novo se dá pra exportar isso no feed `Carga`.
 
 ## Pipeline do feed (Etapa 3 — concluída)
 
@@ -338,9 +352,9 @@ cache funcionou como projetado, sem exceção não tratada.
    Etapa 3) antes de gerar qualquer página de condomínio a partir delas.
 4. Sem dado de locação no feed hoje — decidir se a aba "Alugar" da busca fica
    visível vazia (com estado vazio elegante) ou oculta até existir estoque.
-5. **Redirects 301 do site atual e do domínio antigo** (`fernandomoraesimoveis.com.br`)
-   não implementados — precisa do inventário de URLs indexadas do Search
-   Console (briefing seção 5) antes de mapear origem → destino.
+5. **Redirects 301 do domínio antigo `fernandomoraesimoveis.com.br`** ainda
+   não implementados — precisa do export do Search Console desse domínio
+   (o do domínio atual já foi feito, ver `docs/redirects-301.md`).
 6. Credenciais de SMTP para o envio de e-mail de leads (`SMTP_HOST` etc. em
    `.env.example`) ainda não configuradas em nenhum ambiente — sem isso,
    `/api/leads` loga o lead mas não envia (retorna 503 de propósito).
