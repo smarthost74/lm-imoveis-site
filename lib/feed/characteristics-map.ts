@@ -1,4 +1,4 @@
-import type { CharacteristicInfo, CharacteristicKey } from "./types.ts";
+import type { CharacteristicGroup, CharacteristicInfo, CharacteristicKey } from "./types.ts";
 
 /**
  * Dicionário tag XML → { label PT-BR, grupo }. Lista ABERTA: o parser deve
@@ -68,4 +68,28 @@ export function mapCharacteristics(keys: CharacteristicKey[]): {
     else unmapped.push(key);
   }
   return { known, unmapped };
+}
+
+const GROUP_LABELS: Record<CharacteristicGroup, string> = {
+  lazer_condominio: "Lazer do condomínio",
+  seguranca: "Segurança",
+  acabamento_imovel: "Acabamento do imóvel",
+  infraestrutura_lote: "Infraestrutura do terreno/lote",
+};
+
+export function groupCharacteristics(
+  keys: CharacteristicKey[]
+): { group: CharacteristicGroup; groupLabel: string; items: CharacteristicInfo[] }[] {
+  const { known } = mapCharacteristics(keys);
+  const groups = new Map<CharacteristicGroup, CharacteristicInfo[]>();
+  for (const info of known) {
+    const list = groups.get(info.group) ?? [];
+    list.push(info);
+    groups.set(info.group, list);
+  }
+  return [...groups.entries()].map(([group, items]) => ({
+    group,
+    groupLabel: GROUP_LABELS[group],
+    items,
+  }));
 }

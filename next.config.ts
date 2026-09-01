@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // CLAUDE.md é curado manualmente pelo projeto (ver seção "Como trabalhar
+  // aqui") — não deixar o Next reescrevê-lo a cada `next dev`.
+  agentRules: false,
   images: {
     // SVG local em /public (ex. placeholders de demonstração) — seguro
     // porque são arquivos nossos, não upload de terceiro.

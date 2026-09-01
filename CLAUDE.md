@@ -202,6 +202,52 @@ docs/
 .claude/launch.json       config do dev server para o preview do Claude Code
 ```
 
+## Páginas (Etapa 5 — concluída)
+
+`lib/data.ts` é a camada de leitura server-side de `data/listings.json`
+(cache por request via `react.cache`) — todas as páginas leem por aqui, não
+direto do arquivo. Degrada para "sem imóveis" se o pipeline nunca rodou,
+não quebra o build.
+
+Rotas construídas:
+- `/` — home completa (hero+busca, chips, destaques, bairros, condomínios,
+  serviços, lançamentos, quem somos resumido, buscas populares).
+- `/imovel/[id]/[slug]` — `[id]` é o numérico já usado pelo site antigo
+  (extraído do sufixo de `CodigoImovel`), preservando a URL indexada.
+  Estado "indisponível" chamado explicitamente, nunca 404 quando o imóvel
+  já existiu (só 404 se o `id` nunca existiu no store).
+- `/comprar/[cidade]`, `/alugar/[cidade]` e `/[tipo]-a-venda-em-[cidade]` /
+  `/[tipo]-para-alugar-em-[cidade]` — todas usam `app/_shared/ListagemImoveis.tsx`
+  (filtro por bairro/dormitórios, ordenação, paginação clássica). `/comprar`
+  e `/alugar` sem cidade redirecionam para `/taubate` (única cidade ativa).
+- `/imoveis/[cidade]/[localidade]` — resolve `[localidade]` como bairro OU
+  condomínio (mesma forma de URL para os dois, ver briefing); 404 se não
+  houver estoque ativo ali (evita página rasa).
+- Institucionais: `/quem-somos` (reescrita — empresa, dois sócios, Fernando
+  advogado+corretor), `/lancamentos`, `/servicos`, `/contato`,
+  `/politica-de-privacidade` (rascunho — **pedir revisão jurídica antes do
+  lançamento**, o próprio Fernando é advogado).
+- Redirects externos (`redirect()` do Next): `/area-do-locatario`,
+  `/area-do-proprietario`, `/segunda-via-boleto` (mesma URL da área do
+  locatário), `/ficha-cadastro`.
+- `/not-found` customizado com `SearchBar`.
+
+**Bug de ambiente descoberto e contornado:** `next dev` com Turbopack
+crashava (`memory allocation ... failed`, panic em Rust) ao compilar
+qualquer rota nesta máquina — `next build` (produção, também Turbopack) e
+`next dev --webpack` funcionam normalmente. `package.json` → `"dev": "next
+dev --webpack"`. Não usar Turbopack no dev aqui até a causa raiz ser
+identificada (possível bug do Turbopack nesta combinação de SO/Node); build
+de produção não é afetado.
+
+**Cuidado ao gerar título de página (`generateMetadata`):** usar sempre o
+nome de exibição resolvido (`resolveCidadeNome()` em `lib/data.ts`, ou o
+nome do bairro/condomínio já capitalizado), nunca o slug da URL cru — e
+nunca concatenar `" | Lobato & Moraes Imóveis"` manualmente, porque
+`app/layout.tsx` já aplica esse sufixo via `title.template`. Os dois bugs
+já apareceram uma vez nesta etapa (título "em taubate" e sufixo duplicado)
+e foram corrigidos.
+
 ## Pipeline do feed (Etapa 3 — concluída)
 
 `scripts/fetch-feed.ts` é o job diário (agendar no cron do cPanel). Roda
@@ -258,3 +304,5 @@ cache funcionou como projetado, sem exceção não tratada.
    Etapa 3) antes de gerar qualquer página de condomínio a partir delas.
 4. Sem dado de locação no feed hoje — decidir se a aba "Alugar" da busca fica
    visível vazia (com estado vazio elegante) ou oculta até existir estoque.
+
+<!-- END:nextjs-agent-rules -->

@@ -32,6 +32,9 @@ export const COMPANY = {
   ],
 } as const;
 
+/** Base para montar URLs absolutas (mensagens de WhatsApp, JSON-LD). */
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.lobatoemoraesimoveis.com.br";
+
 export function buildWhatsappLink(params: { telefone?: string; mensagem: string }): string {
   const numero = (params.telefone ?? COMPANY.whatsapp).replace(/\D/g, "");
   return `https://wa.me/${numero}?text=${encodeURIComponent(params.mensagem)}`;
