@@ -1,130 +1,147 @@
-# Análise do feed VRSync — Lobato & Moraes Imóveis
+# Análise do feed `Carga` — Lobato & Moraes Imóveis
 
-> Gerado em 31/08/2026, a partir do feed real baixado de:
-> `https://www.lobatoemoraesimoveis.com.br/feed/vivareal/wg5kjqpfd37ayx6rstnezh9ci102490_www.fernandomoraesimoveis.com.br.xml`
-> Cópia local: `docs/feed-raw.xml` (107 KB) · amostra de um `<Listing>` completo: `docs/sample-listing.xml`
+> Gerado em 31/08/2026 (dado do próprio feed) / baixado em 01/09/2026, a partir do feed real:
+> `https://www.lobatoemoraesimoveis.com.br/feed/portais_personalizados/2ln76spwq31oyafezghucmbrx102490_www.lobatoemoraesimoveis.com.br.xml`
+> Cópia local: `docs/feed-carga-raw.xml` (93 KB, 8 imóveis) · script de análise: `scripts/analyze-feed.mjs` (Node, sem dependências)
+
+## ⚠️ Correção sobre a sessão anterior
+
+Existe um commit anterior neste repositório (`1cd1f44`) com um `docs/feed-analysis.md` baseado no **feed errado**: a URL usada então era `feed/vivareal/...fernandomoraesimoveis.com.br.xml`, formato **VRSync** (schema `ListingDataFeed`), de um domínio antigo (`fernandomoraesimoveis.com.br`), não o domínio de produção atual. Este documento substitui aquele, baseado no feed correto especificado no briefing (elemento raiz `<Carga>`).
+
+Não descartei o arquivo antigo (`docs/feed-raw.xml`, ainda no histórico do Git) — mas ele **não deve ser usado como referência de schema**. Os dois feeds têm formatos, campos e nomenclatura completamente diferentes (ex.: o VRSync tinha `Latitude`/`Longitude`, `RentalPrice`, `Warranties` como possibilidade; o `Carga` real não tem nenhum desses três).
+
+## 🔴 Achado não previsto no briefing: certificado SSL do domínio de produção expirou
+
+Ao tentar baixar o feed por HTTPS, a conexão falhou com `SEC_E_CERT_EXPIRED`. Verificação direta do certificado:
+
+```
+subject=CN=lobatoemoraesimoveis.com.br
+issuer=Let's Encrypt
+notBefore=Jun  3 2026
+notAfter=Sep  1 2026 14:00:57 GMT   ← expirou HOJE, poucas horas atrás
+```
+
+O feed e as imagens continuam acessíveis (baixei ignorando a verificação do certificado, só para fins de leitura/análise — nenhum dado foi enviado ao site), mas isso significa que **o site em produção hoje está com HTTPS quebrado** para qualquer cliente que valide certificado corretamente (todo navegador). Isso não é uma tarefa da Etapa 1, mas é urgente o suficiente para reportar agora: recomendo verificar com quem administra o cPanel/AutoSSL do domínio atual, independente do cronograma da migração — cada hora com o cadeado quebrado é visitante perdido e sinal negativo para o Google.
 
 ## Resumo executivo
 
-O feed é válido, bem-formado e **codificado em UTF-8 puro, sem mojibake** — o problema de encoding do site atual (item 1.4 do `sitenovo.md`) **não existe no feed**, é um defeito só do template de renderização do site atual. Ótima notícia: o site novo não herda esse defeito automaticamente, só precisa não introduzir um novo.
+O feed é válido, bem-formado, raiz `<Carga>` confirmada, e **UTF-8 realmente limpo** (acentuação correta em `Taubaté`, `Jardim das Nações`, `Área de Serviço` etc. — nenhum mojibake). A estrutura do schema 4 do briefing bate com o arquivo real, com um porém importante:
 
-Mas duas suposições do briefing não se confirmam nos dados reais e mudam o desenho do parser e da v1:
+**O catálogo completo hoje tem exatamente 8 imóveis — os mesmos 8 da amostra do briefing.** Não existe um catálogo maior por trás da amostra: a amostra *é* o catálogo atual inteiro. Isso muda a escala esperada do projeto (ver seção 1).
 
-1. **Não há corretor por imóvel no feed.** `ContactInfo` é sempre a imobiliária, nunca um corretor individual.
-2. **Não há campo de condomínio nem de garantia (`Warranties`) em nenhum dos 11 imóveis.** O nome do condomínio, quando existe, está embutido em texto livre dentro de `Description`.
+Respostas às três dúvidas obrigatórias da seção 4:
 
-Ambos afetam diretamente escopo da v1 (seção 7 do prompt) e merecem decisão sua antes da Etapa 2.
+1. **Locação:** não há nenhum imóvel de locação no feed, nem o campo `PrecoLocacao` aparece em nenhum registro. Todos os 8 imóveis são venda (`PrecoVenda` presente em 100%).
+2. **`TipoOferta`:** valores `1` (6 imóveis) e `2` (2 imóveis) — **não correlaciona com venda/locação** (todos são venda) nem com faixa de preço de forma limpa (o imóvel de R$ 1.650.000 tem `TipoOferta=1`, mas o de R$ 1.350.000 tem `TipoOferta=2`). Não consegui inferir o significado a partir dos dados — ver pergunta ao final.
+3. **Condomínio:** taxa de extração heurística de `Observacao` = **4 de 7** imóveis com texto (57%; 1 imóvel tem `Observacao` vazia). Ver seção 5 para detalhe e recomendação.
 
-## 1. Volume e cobertura
+## 1. Volume e cobertura — recalibrar expectativa
 
-- **11 imóveis no feed total** — 8 à venda, 3 para locação.
-- **Uma única cidade: Taubaté.** Nenhum imóvel em Tremembé, Caçapava, Campos do Jordão ou Santo Antônio do Pinhal aparece no feed, apesar de o `sitenovo.md` (1.3, 1.5) tratar essas cidades como parte da cobertura geográfica atual.
-- **7 bairros distintos:** Centro, Chácaras Cataguá, Distrito Industrial do Una II, Jardim Marajoara, Jardim das Nações, Loteamento Residencial e Comercial Bosque Flamboyant, Residencial Novo Horizonte.
+- **8 imóveis, todos em Taubaté.** Nenhuma outra cidade aparece.
+- **7 apartamentos, 1 casa.** Todos os apartamentos são `Apartamento Padrão` / categoria `Padrão`; a única casa é `Casa Padrão` / categoria `Térrea`.
+- **6 bairros distintos**, a maioria com 1 imóvel só: Jardim das Nações (3), Vila das Jabuticabeiras (1), Vila Costa (1), Areão (1), Centro (1), Residencial Novo Horizonte (1).
+- **Faixa de preço:** R$ 265.000 a R$ 1.780.000.
 
-⚠️ **Isto muda a escala do projeto.** O briefing fala em "200+ páginas geradas do feed" e em páginas de bairro/condomínio "só onde há estoque real" — com 11 imóveis em 7 bairros, o estoque real hoje sustenta poucas páginas de bairro e talvez nenhuma de condomínio com volume suficiente (a v1 do prompt já prevê isso: "só onde há estoque real"). Não é um problema do parser, é um dado para calibrar expectativa: o site pode ficar com aparência "vazia" se a arquitetura for dimensionada para 200+ imóveis. Vale confirmar com você se este feed reflete a carteira completa atual ou se é uma amostra/exportação parcial.
+⚠️ **Isto muda a escala do projeto de forma significativa.** O briefing menciona "200+ páginas geradas do feed" e pressupõe estoque suficiente para páginas de bairro e condomínio "só onde há estoque real" (seção 5.5: "página rasa... é ignorada"). Com 8 imóveis em 6 bairros (a maioria com 1 único imóvel), **hoje não há estoque real para nenhuma página de bairro além de Jardim das Nações** (3 imóveis), e nenhum bairro tem volume para uma página robusta o suficiente para não ser "rasa" pelos próprios critérios do briefing.
 
-## 2. Encoding — resolvido, ao contrário do que o site atual sugeria
+Preciso confirmar com você: **este feed de 8 imóveis é a carteira ativa completa hoje**, ou existe mais estoque que não está sendo exportado (ex.: imóveis em rascunho, sem fotos suficientes, ou de captação recente ainda não publicada)? Isso decide se a arquitetura de bairro/condomínio da v1 é dimensionada para "poucas páginas boas" agora com crescimento esperado, ou se há um problema de publicação a investigar antes.
 
-Testei os dois indicadores citados no `sitenovo.md` (padrão `EspÃ­rito`/`Ã§Ã£o` de UTF-8 servido como Latin-1, e o padrão inverso de Latin-1 servido como UTF-8): **nenhum dos dois aparece**. `file` identifica o arquivo como "UTF-8 text" e a acentuação em `Description`, `Title`, `Neighborhood` etc. está correta (`"Taubaté"`, `"Jardim das Nações"`, `"área de serviço"`, `"3 dormitórios (sendo 1 suíte)"`).
+## 2. Encoding — confirmado limpo, sem ação corretiva necessária
 
-**Ação para o pipeline:** ler o XML explicitamente como UTF-8 (não deixar o parser inferir), e ainda assim validar a acentuação pós-parse como está previsto no prompt (seção 12, Etapa 7) — o feed pode mudar de forma sem aviso, já que é gerado por terceiro.
+Validado meu próprio parser (Node, leitura explícita como UTF-8) contra os 8 registros: acentuação correta em todos os campos de texto (`TituloImovel`, `Bairro`, `Endereco`, `Observacao`). Nenhum padrão de mojibake (`Ã§Ã£o`, `Ã­`) encontrado. Confirma o item 1 da seção 4 do briefing — a fonte já vem limpa; qualquer corrupção futura será bug do próprio pipeline.
 
-## 3. Estrutura real observada
+**Um detalhe do template de origem, não do encoding:** em `Observacao`, o cifrão de "R$" aparece cortado ("R 1.780.000", "R 265.000" — falta o `$`). É um defeito da geração de texto da ImobiBrasil (provavelmente o `$` sendo tratado como caractere de template), não um problema de UTF-8. Não reproduzir esse padrão no site novo — usar sempre `PrecoVenda` (numérico) formatado corretamente, nunca o valor textual embutido em `Observacao`.
 
-Todos os elementos que aparecem no feed (ordem alfabética, extraídos programaticamente do XML inteiro):
+## 3. Estrutura confirmada — schema `Carga`
+
+Todos os elementos observados nos 8 imóveis (fora de `Fotos`):
 
 ```
-Address, Bathrooms, Bedrooms, City, Complement, ContactInfo, ContactName,
-Country, Description, DetailViewUrl, Details, Email, Feature, Features,
-Garage, Header, Iptu, Item, Latitude, ListPrice, Listing, ListingDataFeed,
-ListingID, Listings, LivingArea, Location, Logo, Longitude, LotArea, Media,
-Name, Neighborhood, OfficeName, PostalCode, PropertyAdministrationFee,
-PropertyType, Provider, PublicationType, PublishDate, RentalPrice, State,
-StreetNumber, Suites, Telephone, Title, TransactionType, UnitFloor,
-UsageType, Website, YearBuilt, YearlyTax
+CodigoImovel, TituloImovel, TipoImovel, SubTipoImovel, CategoriaImovel, UF, Cidade,
+Bairro, CEP, Endereco, Numero, PrecoVenda, PrecoCondominio, ValorIPTU, AreaUtil,
+AreaTotal, QtdDormitorios, QtdSuites, QtdBanheiros, QtdVagas, QtdSalas, QtdElevador,
+TipoOferta, Observacao, Fotos
 ```
 
-**Elementos do schema VRSync oficial que o prompt previa e que NÃO aparecem em nenhum dos 11 imóveis:**
-- `Warranties` (0 ocorrências)
-- `Floors` / `Buildings` (0 ocorrências — só `UnitFloor` aparece, e só em 1 imóvel)
+**Campos do briefing que NÃO aparecem em nenhum dos 8 imóveis:** `PrecoLocacao`, `Latitude`, `Longitude`, `Complemento`. Trate como ausentes do schema real até prova em contrário (não apenas ausentes desta amostra) — não há nenhum sinal de que existam para outros tipos de oferta.
 
-Isso não significa que o schema não suporte — significa que **a ImobiBrasil não está preenchendo esses campos para esta carteira hoje**, ou o CRM não os captura.
+**Consequência prática:** sem `Latitude`/`Longitude` no feed, o mapa da página de imóvel (seção 3.1) e o `geo` do `RealEstateListing` (seção 6) **dependem de geocodificação por endereço** (CEP + logradouro), não de coordenada vinda do feed. Isso é diferente do que a análise anterior (baseada no feed errado) presumia — lá havia lat/long, mas com eixos trocados.
 
-## 4. Condomínio — não é campo estruturado
+`AreaTotal` está ausente em 2 dos 8 imóveis (25%) — parser deve tratar como opcional e cair para `AreaUtil` na exibição quando faltar.
 
-Confirmando a suspeita do `sitenovo.md` (2.3): **não existe elemento para condomínio no VRSync**, e a ImobiBrasil **não usa nenhum campo custom para isso neste feed**. O nome do condomínio, quando existe, está apenas dentro do texto corrido de `Description`, sem marcação:
+Um imóvel (`APVE056_2-4369119`) tem `Observacao` **vazia** (`<![CDATA[]]>`) — a página de imóvel precisa funcionar sem nenhum texto descritivo, mostrando só as características estruturadas.
 
-> *"O apartamento está em um dos condomínios mais procurados da região, **o Residencial Parque das Nações**, conhecido pelo alto nível de liquidez..."*
+Um imóvel (`APVE055_2-4368917`) tem **32 fotos, nenhuma marcada `Principal=1`** — o parser precisa de fallback (usar a primeira foto da lista como capa) para não quebrar o card/galeria.
 
-Não há padrão consistente de como o nome aparece (às vezes no meio do parágrafo, sem delimitador). Extrair isso via regex é frágil e vai falhar silenciosamente em muitos casos.
+## 4. Características (tags booleanas) — lista real encontrada
 
-**Decisão necessária para a v1/v2** (o prompt já previa isso como ponto de extensão, seção 7): as páginas de condomínio (item 12 da Fase 2) **não podem ser alimentadas automaticamente pelo feed**. Duas opções, não excludentes:
-- Manter uma tabela de mapeamento manual `ListingID → condomínio` (o Plano B que o `sitenovo.md` já cogitava em 2.3 — raspar o site atual antes do cutover, ou simplesmente cadastrar à mão dado o volume baixo: só 11 imóveis).
-- Tentar extração heurística de `Description` como sinal auxiliar, nunca como fonte única.
+37 tags booleanas distintas observadas com valor `1` nos 8 imóveis (lista aberta, mais devem existir em outros imóveis fora desta amostra):
 
-## 5. Corretor por imóvel — não existe no feed
-
-`ContactInfo` de **todos os 11 imóveis** é idêntico e genérico:
-
-```xml
-<ContactInfo>
-  <Name><![CDATA[Lobato & Moraes Imóveis]]></Name>
-  <OfficeName><![CDATA[Lobato & Moraes Imóveis]]></OfficeName>
-  <Email>contato@lobatoemoraesimoveis.com.br</Email>
-  <Telephone>(12) 98166-0001</Telephone>
-  <Website>https://www.lobatoemoraesimoveis.com.br</Website>
-</ContactInfo>
+```
+Academia, Agua, ArCondicionado, AreaLazer, AreaServico, Banheira, Blindex, Cerca,
+Churrasqueira, ChurrasqueiraVaranda, Closet, Clube, CozinhaAmericana, EnergiaEletrica,
+EntradaServicoIndependente, EspacoGourmet, Guarita, Hidromassagem, Interfone, Lavabo,
+Luz, MoveisPlanejados, Piscina, Playground, Porcelanato, QuadraPoliEsportiva,
+QuadraTenis, Quintal, RedeTelefone, Restaurante, SalaGrande, SalaoFestas, SalaoJogos,
+SegurancaInterna, SegurancaRua, TV, Telefone, Varanda, VarandaGourmet
 ```
 
-Nenhum nome de corretor individual, CRECI ou telefone diferente por imóvel. Isso é diferente do que a página do imóvel no site atual mostra (que exibe "Dogmar Lobato, CRECI 137573-F" — ver `sitenovo.md` 2.3) — ou seja, **esse dado existe no CRM e é mostrado no site atual, mas não é exportado no feed XML**.
+Bate com a lista do briefing, com adições: `Agua`, `Clube`, `EnergiaEletrica`, `EntradaServicoIndependente`, `Luz`, `Quintal`, `SalaGrande`, `SegurancaRua`, `TV`. **Confirma que é lista aberta** — o pipeline deve logar qualquer tag nova não mapeada no dicionário, como o briefing já previa, e não descartar silenciosamente.
 
-**Impacto direto na seção 8 do prompt** ("Número do corretor responsável pelo imóvel, com fallback para o da imobiliária"): sem esse dado no feed, **a v1 não tem como rotear o WhatsApp por corretor automaticamente** a partir do XML. Opções:
-- v1 usa sempre o número da imobiliária (o fallback vira a regra, não a exceção) — mais simples, zero dependência extra.
-- Manter uma tabela manual `ListingID → corretor` como a do condomínio (mesmo mecanismo, mesmo esforço, já que o volume é de 11 imóveis).
-- Perguntar à ImobiBrasil se dá para incluir o corretor responsável no feed (like ela inclui no HTML do site atual).
+Vale registrar: `Agua`, `Luz`, `EnergiaEletrica`, `RedeTelefone`, `Telefone` parecem ser infraestrutura básica do lote/terreno (mais relevantes para a casa térrea) — não são amenidades de lazer. O dicionário de mapeamento tag → grupo precisa de uma categoria além de "Lazer do condomínio" / "Segurança" / "Acabamento": algo como **"Infraestrutura do terreno/lote"**.
 
-Recomendo a primeira opção para a v1 (fallback vira regra) e revisitar quando o volume de imóveis justificar o esforço de tabela manual.
+## 5. Condomínio — extração heurística parcialmente viável, não confiável como fonte única
 
-## 6. Erro de cadastro confirmado no feed real (mesma classe do item 1.6 do sitenovo.md)
+Testei os padrões sugeridos no briefing contra os 7 imóveis com `Observacao` preenchida:
 
-`APVE050_2-4296705`: o prefixo do código interno (`APVE` = Apartamento Venda) e o `ListPrice`/estrutura de preço sugerem venda, mas:
-- `TransactionType` = `For Rent`
-- A URL (`DetailViewUrl`) do próprio feed é `.../apartamento-locacao-taubate-sp-...`
+| Código | Resultado |
+|---|---|
+| APVE052 | ✅ "Residencial MOB" |
+| APVE054 | ❌ não encontrado (mas **o nome já está no `TituloImovel`**: "Condomínio Cyan") |
+| APVE055 | ✅ "Village Towers" |
+| APVE056 | — (`Observacao` vazia) |
+| APVE057 | ✅ "Edifício Europa" |
+| APVE058 | ❌ não encontrado |
+| CAVE059 | ❌ não encontrado (é a casa térrea — não fica em condomínio fechado com nome próprio, é bairro aberto) |
+| APVE061 | ✅ "Edifício Des Arts" |
 
-É o mesmo padrão de inconsistência já documentado para `APLOC031` (título dizendo "Venda" num imóvel de locação). Aqui é o inverso: código interno de venda, mas o imóvel está publicado como locação. **Recomendo reportar ao Fernando/Lobato para correção no CRM antes do cutover**, junto com os outros três já catalogados.
+**Taxa: 4/7 (57%) via `Observacao`.** Mas descobri uma segunda fonte: **o `TituloImovel` às vezes já contém o nome do condomínio** de forma mais estruturada (`"Apartamento 3 Quartos| Venda | Condomínio Cyan | Taubaté"`), inclusive em um caso (APVE054) onde a extração de `Observacao` falhou. Combinando as duas fontes eu chegaria a 5/7, mas ainda não é confiável o bastante para gerar páginas de condomínio automaticamente sem revisão humana — principalmente porque um falso positivo (nome errado extraído) é pior do que não gerar a página.
 
-## 7. Latitude/Longitude — inconsistentes, alguns fora do Brasil
+**Recomendação:** não deixe a extração heurística gerar página de condomínio publicada diretamente. Ela é útil como **sugestão pré-preenchida** numa tabela de mapeamento manual pequena (`CodigoImovel → condomínio`), que você confirma/corrige — com 8 imóveis o esforço manual é de minutos, não de uma feature de parsing. Reavaliar quando o volume justificar investir em extração automática mais robusta (ou, melhor ainda, perguntar à ImobiBrasil se dá para exportar o campo estruturado, já que o domínio antigo tinha páginas de empreendimento funcionando — sinal de que o dado existe no CRM).
 
-Os valores de `Latitude` e `Longitude` estão **trocados** nos 6 imóveis mais confiáveis do lote (ex.: `Latitude=-45.578...`, `Longitude=-23.026...` — no Brasil, latitude fica perto de -23 e longitude perto de -45, ou seja, os campos estão invertidos). Mas em **3 dos 11 imóveis** os valores não são sequer uma troca simples — caem fora da faixa geográfica do Brasil inteiro (ex. `Latitude=-75.69`, `Longitude=-4.81`), indicando geocodificação com falha na origem, não só campo trocado.
+## 6. Corretor por imóvel — confirmado ausente, como o briefing já esperava
 
-**Ação no parser:** não usar lat/long do feed diretamente no `geo` do schema JSON-LD sem validação. Sugiro: (a) detectar e corrigir a troca de eixo automaticamente quando o padrão for claro (lat negativa grande / long negativa pequena, valores fora de faixa para SP), (b) para os que caem fora de qualquer faixa plausível do Vale do Paraíba, cair para geocodificação pelo endereço (CEP + logradouro) em vez de usar o valor do feed, ou omitir `geo` daquele imóvel em vez de publicar coordenada errada.
+Não existe nenhum campo de corretor, nome, telefone individual ou CRECI em nenhum dos 8 registros. Confirma a diretriz da seção 4/8 do briefing: v1 usa sempre o WhatsApp único da imobiliária.
 
-## 8. Description — confirma as regras do prompt
+## 7. Descrição (`Observacao`) — estrutura mais complexa do que o briefing previa
 
-- Vem em `CDATA`, com entidades HTML codificadas (`&lt;br&gt;`) exatamente como o prompt previa. Precisa decode + sanitização antes de renderizar.
-- Texto é redigido em blocos com `<br>` como separador de parágrafo, sem outras tags — sanitização é simples (decode de entidades + normalizar quebras).
-- Como já indicado no briefing: o texto é genérico e repetido em estrutura entre os 11 imóveis ("Se você busca... custo-benefício, localização estratégica..."). Confirma a necessidade de conteúdo exclusivo por página (bairro/condomínio/observação do corretor) para não duplicar o que já está no OLX/ZAP/VivaReal.
+Confirma: vem em `CDATA`, com `&lt;br&gt;` como quebra de linha, e **realmente repete em texto as mesmas características já estruturadas** — mas a repetição acontece **duas vezes**, não uma, com um trecho valioso no meio que a regra simples do briefing ("corte tudo depois de 'Resumo do imóvel'") apagaria sem querer.
 
-## 9. Dados que confirmam funcionalidades da v1
+Estrutura real observada, em ordem, nos 7 registros com texto:
 
-- `RentalPrice` + `PropertyAdministrationFee` + `Iptu`, todos com atributo `period`, presentes e consistentes nos 3 imóveis de locação → **o cálculo de "custo total mensal" (item 1 da v1) é viável direto do feed**, sem dado faltante.
-- `Features` traz uma lista padronizada em inglês (`Pool`, `Gym`, `Pets Allowed`, `BBQ`, `Elevator` etc.) — precisa de uma tabela de tradução PT-BR para exibição, mas o dado em si é limpo e enumerado (bom para os chips de categoria da v2).
-- `ListPrice` + `LivingArea` → R$/m² calculável como no briefing (elemento assinatura, v2).
-- `DetailViewUrl` confirma o padrão `/imovel/{id-numérico}/{slug}` já mapeado no `sitenovo.md`, com `{id-numérico}` diferente do `ListingID` completo do feed (que tem o formato `{CÓDIGO-INTERNO}_2-{id-numérico}`, ex. `APVE019_2-3839575`). **Decisão de slug:** usar o `{id-numérico}` (extraído do sufixo do `ListingID` ou direto de `DetailViewUrl`) como base do slug novo, para preservar a URL já indexada — não usar o `ListingID` completo.
+1. **Parágrafo intro** — único, específico do imóvel (endereço, condomínio se houver, resumo de metragem/cômodos). **Manter.**
+2. **2–3 parágrafos de "venda"** — texto redacional específico (ex. "aqui é casa com terreno próprio e sem taxa de condomínio"). **Manter** — é o conteúdo mais próximo de diferenciação real que o feed oferece.
+3. **Marcador `"Resumo do imóvel:"`** seguido de lista com `&lt;br&gt;` repetindo as características estruturadas (dormitórios, banheiros, vagas, m², às vezes condomínio/IPTU em texto). **Cortar.**
+4. **Parágrafo sobre o bairro/condomínio** (ex. "O Edifício Europa é condomínio fechado com..."; "O Residencial Novo Horizonte é um bairro residencial consolidado..."). **Conteúdo único e valioso — manter.** É exatamente o tipo de frase que serve de base para a página de bairro/condomínio (seção 5.5 do briefing).
+5. **`"Valor de venda: R ...  Agende sua visita com a Lobato Moraes Imóveis..."`** — boilerplate de CTA que o site novo já tem seu próprio bloco de CTA. **Cortar.**
+6. **Segunda lista gigante de características**, repetindo de novo tudo (inclusive itens de proximidade tipo "Escola", "Farmácia", "Supermercado" que não são nem tags booleanas do imóvel, mas sim POIs genéricos do bairro). **Cortar.**
 
-## 10. O que NÃO apareceu e não precisa de ação agora
+**Ação de parser revisada:** não é um corte único a partir de "Resumo do imóvel". É: cortar o bloco 3 (do marcador `"Resumo do imóvel:"` até o próximo parágrafo substantivo), manter o bloco 4, e cortar tudo a partir de `"Valor de venda:"` até o fim. Vou implementar isso como uma função de sanitização com esses dois pontos de corte, testada contra os 7 registros reais antes de generalizar.
 
-- `PublicationType` = `PREMIUM` em todos os 11 (não parece variar) — provavelmente não é sinal útil.
-- `Logo` aparece só no `Header`, não por imóvel.
-- Nenhum vídeo em `Media` (`medium="video"`) nesta amostra — o prompt já trata isso como "quando existir", não bloqueante.
+## 8. `TipoOferta` — pergunta em aberto, não presumi nada
 
----
+Distribuição real: `1` em 6 imóveis, `2` em 2 imóveis (`APVE057`, `APVE058` — os dois apartamentos de "alto padrão" citados no próprio texto da `Observacao`, R$ 1.780.000 e R$ 1.350.000). Não é uma correlação limpa de preço (o imóvel de R$ 1.650.000 tem valor `1`). Hipóteses não confirmadas: categoria de destaque/portal, "alto padrão" vs. "padrão" (mas já existe `CategoriaImovel` para isso, que diz "Padrão" nos dois), ou um campo de configuração do corretor sem relação com o imóvel em si. **Preciso que você confirme com a ImobiBrasil ou verifique no painel do CRM o que esse campo significa antes de eu decidir se ele entra em algum filtro ou exibição da v1.**
+
+## 9. `CategoriaImovel` — dado extra não previsto no briefing
+
+Aparece em 100% dos imóveis: `"Padrão"` (7×) ou `"Térrea"` (1×, para a casa). Parece descrever o formato construtivo, não o padrão de acabamento (apesar do nome). Vale mapear no modelo de dados mesmo sem uso definido na v1 — é campo simples de preservar.
 
 ## Decisões que preciso da sua confirmação antes da Etapa 2
 
-1. **Este feed de 11 imóveis é a carteira real e completa hoje**, ou existe uma exportação maior em outro lugar? Isso muda o dimensionamento de bairros/condomínios da v1.
-2. **Corretor por imóvel:** confirmar que a v1 usa sempre o WhatsApp/telefone da imobiliária (não do corretor individual), já que o feed não traz esse dado.
-3. **Condomínio:** aceitar que páginas de condomínio na v1 dependem de uma tabela manual pequena (`ListingID → condomínio`), já que são só 11 imóveis — ou prefere que eu tente extração heurística de `Description` como complemento?
-4. Confirma que o erro em `APVE050` (venda vs. locação) deve ser reportado para correção no CRM, e a v1 deve **exibir o que o feed diz** (`TransactionType = For Rent`) sem tentar "adivinhar" a partir do código interno?
+1. **O feed de 8 imóveis é a carteira ativa completa hoje?** Se sim, a v1 nasce com páginas de bairro/condomínio bem mais restritas do que "200+ páginas" sugere — preciso saber se isso é esperado (carteira vai crescer) ou se há imóveis fora do feed que deveriam estar nele.
+2. **Certificado SSL expirado hoje** (`lobatoemoraesimoveis.com.br`) — quer que eu sinalize isso para alguém agir agora, independente da migração, ou você já está ciente/tratando disso em paralelo?
+3. **`TipoOferta` (1 vs. 2):** você sabe o que esse campo significa no CRM da ImobiBrasil? Não vou usá-lo em nenhum filtro/exibição até confirmar.
+4. **Condomínio:** confirma que a v1 usa uma tabela manual pequena (`CodigoImovel → condomínio`), pré-preenchida com as 5 sugestões heurísticas encontradas (4 de `Observacao` + 1 de `TituloImovel`) para você revisar, em vez de gerar a página automaticamente a partir do texto?
+5. Sem nenhum imóvel de locação no feed hoje, **a v1 constrói a UI de aba "Alugar" e o cálculo de custo total mensal mesmo sem dado para popular** (ficam prontos, mas vazios/ocultos até existir estoque), ou adiamos essa aba inteira para quando houver locação real no feed?
 
-Nenhuma dessas pendências bloqueia a Etapa 2 (fundação: estrutura de pastas, modelo de dados TypeScript, tokens de design) — só peço confirmação antes de eu fixar o modelo de dados, porque os itens 2 e 3 mudam os campos que o tipo `Listing` do TypeScript vai carregar.
+Nenhuma dessas pendências bloqueia a Etapa 2 (fundação: estrutura de pastas, modelo de dados TypeScript, tokens de design) — os itens 1, 3 e 4 mudam campos do tipo `Listing`, então prefiro sua confirmação antes de fixá-los.
