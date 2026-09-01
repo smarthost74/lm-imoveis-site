@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#e2ddd0"/>
+  <rect width="800" height="600" fill="#F5F2EA" opacity="0.4"/>
+  <text x="50%" y="50%" fill="#1B2A4A" font-family="sans-serif" font-size="24" text-anchor="middle" opacity="0.5">foto do imóvel</text>
+</svg>

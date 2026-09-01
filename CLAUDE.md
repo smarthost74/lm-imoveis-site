@@ -64,6 +64,50 @@ Piso não negociável: mobile-first, foco de teclado visível (`:focus-visible`
 já em `globals.css`), `prefers-reduced-motion` respeitado (já tratado em
 `globals.css`), contraste adequado, `alt` descritivo em toda imagem.
 
+**Logo oficial:** `public/logo.png`, recortado com `sharp` a partir do
+arquivo original em `.../05_Marketing_e_Publicidade/Identidade_Visual/
+Logotipo Oficial Sem Fundo PNG.png` (o arquivo original tem uma área
+transparente enorme ao redor do texto — `public/logo.png` já vem cortado
+para o bounding box real do wordmark "LOBATO & MORAES" em dourado). Não há
+versão invertida (branca) com transparência disponível ainda — o rodapé
+(fundo navy) usa texto, não a logo, até existir esse arquivo.
+
+## Os 8 componentes (Etapa 4 — concluída)
+
+Todos em `components/`, Tailwind puro (sem lib de UI), ícones em SVG inline
+(`components/icons.tsx`, sem lib de ícones). `app/demo-componentes/page.tsx`
+reúne os 8 juntos para revisão visual (lê `data/listings.json` se existir;
+não faz parte do site público, não linkar de lugar nenhum).
+
+1. **`ImovelCard`** — estados: normal, "indisponível" (overlay "Vendido"),
+   hover. Preço muda conforme `finalidade` (venda vs. custo total mensal).
+2. **`SearchBar`** (client) — abas Comprar/Alugar com faixa de valor própria
+   por aba (testado: trocar de aba troca as opções). Tipo em multi-seleção,
+   agrupado. Sem dado de locação real ainda — a busca gera a URL mesmo assim,
+   a listagem (Etapa 5) mostra estado vazio.
+3. **`Hero`** — reutilizável em home/bairro/condomínio via props de
+   imagem/headline; slot para a busca sobreposta.
+4. **`LocationCard`** — bairro ou condomínio (prop `tipo`), com foto e
+   contagem de imóveis.
+5. **`Gallery`** (client) — grid + lightbox acessível por teclado (setas
+   para navegar, Esc para fechar — testado). Estado "sem fotos".
+6. **`ContactCta`** (client) — botão `wa.me` + formulário com honeypot,
+   `fetch` para `/api/leads` (rota ainda não existe — Etapa 6). Estados:
+   idle/enviando/sucesso/erro.
+7. **`BrokerCard`** — WhatsApp como CTA visualmente dominante; telefone em
+   segundo plano. `sticky` opcional para a página de imóvel.
+8. **`Header`** (client, menu mobile) **+ `Footer`** (NAP completo, testado
+   via DOM) — sem mega-menu, sem login, rodapé em colunas por intenção.
+
+`lib/company.ts` centraliza NAP + WhatsApp + redes sociais + sócios — fonte
+única para rodapé, componentes e (Etapa 6) o Schema JSON-LD.
+
+**Nota sobre o Browser pane do Claude Code:** quando o pane está oculto,
+`computer screenshot` pode devolver um frame em branco/desatualizado mesmo
+com o DOM renderizado corretamente — confirmar via `read_page`/
+`get_page_text`/`javascript_tool` antes de assumir bug visual a partir de um
+screenshot suspeito.
+
 ## Modelo de dados do feed — decisões vivas
 
 Ver `docs/feed-analysis.md` para a validação completa contra o catálogo real
