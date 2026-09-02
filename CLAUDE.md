@@ -116,6 +116,38 @@ não faz parte do site público, não linkar de lugar nenhum).
 `lib/company.ts` centraliza NAP + WhatsApp + redes sociais + sócios — fonte
 única para rodapé, componentes e (Etapa 6) o Schema JSON-LD.
 
+### Revisões pós-Etapa 7 (feedback direto do usuário)
+
+A lista acima descreve o estado da Etapa 4. Várias decisões do briefing
+original foram revertidas depois, por pedido explícito do usuário durante
+a revisão do site já no ar — registradas aqui para não serem
+"corrigidas de volta" por engano numa sessão futura:
+
+- **`SearchBar`** não é mais um cartão vertical com abas simples — é
+  horizontal, abas no formato de guias do Chrome (a ativa funde com o
+  painel de campos abaixo). Só 3 campos: Tipo de Imóvel (select único,
+  não mais multi-seleção), Localização (texto livre), Buscar. Dormitórios/
+  faixa de valor saíram daqui, viraram filtro da listagem.
+- **Banner da home removido.** A home não tem mais Hero/foto de capa —
+  vai direto do cabeçalho pra `SearchBar`. `Hero` voltou a ter um único
+  layout (`overlay`), continua em uso só em bairro/condomínio.
+- **Carrossel na home: permitido, contrariando o briefing original.** O
+  briefing proibia carrossel na home para evitar estética de portal — o
+  usuário pediu explicitamente o oposto depois de ver o site: os grids de
+  "Imóveis em destaque" (à venda / para locação) agora são
+  `components/ImovelCarousel.tsx`, scroll horizontal nativo com setas,
+  sem autoplay. Não estender esse padrão pra outros grids (bairros,
+  condomínios, semelhantes) sem pedido explícito — o usuário pediu só
+  para os grids de imóvel da home.
+- **Header e Footer**: fundo `bg-navy` (não branco), logo completo
+  (losango + wordmark) em vez de texto/wordmark sozinho — ver seção
+  "Logo oficial" acima. Ícones de Facebook/Instagram visíveis no
+  cabeçalho (desktop e menu mobile) e no rodapé.
+- **`ImovelCard`** ganhou selo "Venda"/"Locação" sobre a foto e R$/m²
+  (venda) abaixo do preço.
+- Cores e tipografia: ver seção "Identidade visual" — Navy/Dourado e
+  Montserrat/Poppins substituíram os valores do briefing original.
+
 **Nota sobre o Browser pane do Claude Code:** quando o pane está oculto,
 `computer screenshot` pode devolver um frame em branco/desatualizado mesmo
 com o DOM renderizado corretamente — confirmar via `read_page`/
@@ -421,5 +453,13 @@ automaticamente no cron job nem em comandos manuais por SSH (precisa de
 6. Credenciais de SMTP para o envio de e-mail de leads (`SMTP_HOST` etc. em
    `.env.example`) ainda não configuradas em nenhum ambiente — sem isso,
    `/api/leads` loga o lead mas não envia (retorna 503 de propósito).
-7. `NEXT_PUBLIC_GA4_MEASUREMENT_ID` ainda não configurado — sem ele, o script
-   do GA4 simplesmente não renderiza (comportamento esperado, não é bug).
+7. `NEXT_PUBLIC_GA4_MEASUREMENT_ID`, `NEXT_PUBLIC_GOOGLE_ADS_ID` e
+   `NEXT_PUBLIC_FACEBOOK_PIXEL_ID` ainda não configurados — sem eles, os
+   respectivos scripts simplesmente não renderizam (comportamento
+   esperado, não é bug; testado com valores fictícios em 01/09/2026,
+   confirmado via HTML renderizado que os três aparecem quando
+   configurados). Faltam também: (a) o "rótulo de conversão" do Google
+   Ads, que é por ação e vem separado do ID da conta — necessário para
+   rastrear conversão de verdade, não só pageview/remarketing; (b) decidir
+   se além de pageview automático o Facebook Pixel deve disparar
+   `ViewContent` por imóvel visto (não implementado ainda).

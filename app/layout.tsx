@@ -3,6 +3,7 @@ import { Montserrat, Poppins } from "next/font/google";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
+import { FacebookPixel } from "@/components/FacebookPixel";
 import { realEstateAgentJsonLd } from "@/lib/seo/jsonld";
 import { SITE_URL } from "@/lib/company";
 import "./globals.css";
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(realEstateAgentJsonLd()) }}
         />
         <GoogleAnalytics />
+        <FacebookPixel />
         <Header />
         <div className="flex-1">{children}</div>
         <Footer />
