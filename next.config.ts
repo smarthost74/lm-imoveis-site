@@ -4,6 +4,14 @@ const nextConfig: NextConfig = {
   // CLAUDE.md é curado manualmente pelo projeto (ver seção "Como trabalhar
   // aqui") — não deixar o Next reescrevê-lo a cada `next dev`.
   agentRules: false,
+  // O servidor de produção (cPanel/CloudLinux) reporta 80 CPUs mas limita
+  // processos simultâneos por conta (LVE) bem abaixo disso — sem isso, o
+  // build tenta abrir dezenas de workers ("Collecting page data using N
+  // workers") e trava com EAGAIN. `taskset` sozinho não resolve essa etapa
+  // porque ela lê a contagem de CPUs do SO, não a afinidade do processo.
+  experimental: {
+    cpus: 2,
+  },
   images: {
     // SVG local em /public (ex. placeholders de demonstração) — seguro
     // porque são arquivos nossos, não upload de terceiro.
