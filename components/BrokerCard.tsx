@@ -31,7 +31,8 @@ export function BrokerCard({
     <div
       className={`rounded-lg border border-borda bg-white p-5 ${sticky ? "lg:sticky lg:top-4" : ""}`}
     >
-      <p className="font-display text-lg text-navy">{nome}</p>
+      <p className="font-display text-lg text-navy">Entre em contato conosco</p>
+      <p className="text-sm text-texto-suave">{nome}</p>
       {creci && <p className="text-xs text-texto-suave">CRECI {creci}</p>}
 
       <a

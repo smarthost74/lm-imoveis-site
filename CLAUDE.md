@@ -147,6 +147,48 @@ a revisão do site já no ar — registradas aqui para não serem
   (venda) abaixo do preço.
 - Cores e tipografia: ver seção "Identidade visual" — Navy/Dourado e
   Montserrat/Poppins substituíram os valores do briefing original.
+- **Layout fluido "sem limite físico" (pedido explícito, 01/09/2026).**
+  O container padrão do site trocou de `max-w-6xl` (1152px) para
+  `max-w-[1600px]` em todas as páginas/Header/Footer, com padding
+  gradual (`px-4 sm:px-6 lg:px-8`) — em telas grandes o site usa bem mais
+  espaço em vez de ficar numa coluna estreita com margens enormes. Os
+  grids de cartão que podem ter qualquer quantidade de itens (listagem
+  com filtro, "imóveis semelhantes", bairros/condomínios da home, grid
+  de bairro/condomínio) trocaram de colunas fixas por breakpoint
+  (`sm:grid-cols-2 lg:grid-cols-4`) para `grid-cols-[repeat(auto-fit,
+  minmax(260px,1fr))]` — o número de colunas cresce continuamente com a
+  largura disponível, sem teto fixo (`auto-fit`, não `auto-fill`: colunas
+  vazias colapsam e os itens existentes esticam para preencher, em vez de
+  deixar um buraco quando há menos itens do que caberiam na linha). Grids
+  de conteúdo fixo/pequeno (Serviços, Lançamentos, Buscas populares) foram
+  deixados como estavam — não fazem sentido "sem limite" com 2-6 itens
+  fixos.
+- **App-like no mobile (pedido explícito, 01/09/2026):** dois ajustes
+  concretos, não uma reescrita visual geral —
+  1. Todo `<input>`/`<select>`/`<textarea>` de formulário (SearchBar,
+     filtros da listagem, ContactCta) agora tem `text-base sm:text-sm`
+     (16px no mobile, volta a 14px a partir de `sm`). Abaixo de 16px o
+     Safari no iOS dá zoom automático ao focar o campo — comportamento
+     de site, não de app. Não vale para os checkboxes de características
+     (não disparam esse zoom).
+  2. Na página de imóvel, o CTA de WhatsApp inline (`lg:hidden`, ficava
+     logo abaixo do preço) virou uma barra fixa no rodapé da tela
+     (`fixed inset-x-0 bottom-0`, com `env(safe-area-inset-bottom)` pro
+     notch/home indicator do iPhone) — sempre visível sem precisar rolar,
+     como o CTA principal de apps de listagem (OLX, VivaReal, Zillow).
+     `<main>` ganhou `pb-24 lg:pb-16` pra essa barra não cobrir o fim do
+     conteúdo. Substitui o botão inline, não duplica.
+- **CTA da página de imóvel modernizado (pedido explícito, 01/09/2026):**
+  `BrokerCard` não mostra mais `{nome}` (o nome da imobiliária) como
+  título — o título fixo agora é "Entre em contato conosco", com o nome
+  da imobiliária como subtítulo menor logo abaixo (CRECI continua depois).
+  A mensagem de WhatsApp da página de imóvel (usada tanto pelo botão do
+  `BrokerCard` quanto pela barra fixa mobile) trocou de um texto longo
+  (título + código + endereço completo do imóvel) para
+  `"Quero mais informações sobre este imóvel: {url da página}"` — mais
+  curta, sem repetir informação que já está na própria página. O número
+  de WhatsApp não mudou (`COMPANY.whatsapp`, já era o (12) 98166-0001
+  pedido).
 
 **Nota sobre o Browser pane do Claude Code:** quando o pane está oculto,
 `computer screenshot` pode devolver um frame em branco/desatualizado mesmo

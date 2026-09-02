@@ -68,7 +68,7 @@ export function SearchBar({ cidades = ["Taubaté"] }: { cidades?: string[] }) {
           <select
             value={tipo}
             onChange={(e) => setTipo(e.target.value)}
-            className="rounded-lg border border-borda px-3 py-2.5"
+            className="rounded-lg border border-borda px-3 py-2.5 text-base sm:text-sm"
           >
             <option value="">Todos</option>
             {TIPOS.map((t) => (
@@ -86,7 +86,7 @@ export function SearchBar({ cidades = ["Taubaté"] }: { cidades?: string[] }) {
             value={localizacao}
             onChange={(e) => setLocalizacao(e.target.value)}
             placeholder="Digite cidade, bairro ou rua"
-            className="rounded-lg border border-borda px-3 py-2.5"
+            className="rounded-lg border border-borda px-3 py-2.5 text-base sm:text-sm"
           />
         </label>
 

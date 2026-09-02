@@ -5,6 +5,7 @@ import { Gallery } from "@/components/Gallery";
 import { BrokerCard } from "@/components/BrokerCard";
 import { WhatsappCtaLink } from "@/components/WhatsappCtaLink";
 import { ImovelCard } from "@/components/ImovelCard";
+import { WhatsappIcon } from "@/components/icons";
 import { getListingByNumericId, getListingsSemelhantes, bairroExiste } from "@/lib/data";
 import { groupCharacteristics } from "@/lib/feed/characteristics-map";
 import { formatArea, formatCurrency } from "@/lib/format";
@@ -64,9 +65,10 @@ function ImovelDetalhe({ listing, id }: { listing: NonNullable<ReturnType<typeof
   // (localização aproximada, pedido explícito do usuário). O endereço
   // completo ainda vai na mensagem de WhatsApp (uso interno do corretor).
   const enderecoAproximado = `${listing.bairro}, ${listing.cidade}/${listing.uf}`;
-  const enderecoCompleto = `${listing.endereco}, ${listing.numero} - ${enderecoAproximado}`;
   const urlPagina = `${SITE_URL}/imovel/${id}/${listing.slug}`;
-  const mensagemWhatsapp = `Olá! Tenho interesse no imóvel ${listing.titulo} (código ${listing.codigoImovel}), em ${enderecoCompleto}. ${urlPagina}`;
+  // Mensagem curta e direta — pedido explícito do usuário para modernizar o
+  // CTA da página de imóvel (antes incluía título, código e endereço completo).
+  const mensagemWhatsapp = `Quero mais informações sobre este imóvel: ${urlPagina}`;
 
   const breadcrumbItems = [
     { nome: "Home", url: SITE_URL },
@@ -82,7 +84,7 @@ function ImovelDetalhe({ listing, id }: { listing: NonNullable<ReturnType<typeof
   ];
 
   return (
-    <main className="mx-auto max-w-6xl px-4 pb-16">
+    <main className="mx-auto max-w-[1600px] px-4 pb-24 sm:px-6 lg:px-8 lg:pb-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(realEstateListingJsonLd(listing, urlPagina)) }}
@@ -136,11 +138,15 @@ function ImovelDetalhe({ listing, id }: { listing: NonNullable<ReturnType<typeof
           )}
 
           {!indisponivel && (
+            // Barra fixa no rodapé da tela (só mobile) — CTA sempre acessível
+            // sem precisar rolar até o topo, como em um app nativo (pedido
+            // explícito do usuário). Substitui o botão inline que havia aqui.
             <WhatsappCtaLink
               href={buildWhatsappLink({ telefone: listing.corretor.whatsapp, mensagem: mensagemWhatsapp })}
               origem="imovel-mobile-cta"
-              className="mt-4 inline-flex items-center gap-2 rounded bg-[#25D366] px-5 py-3 font-medium text-white hover:brightness-95 lg:hidden"
+              className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-center gap-2 bg-[#25D366] px-5 pt-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] font-medium text-white shadow-[0_-4px_16px_rgba(0,0,0,0.15)] hover:brightness-95 lg:hidden"
             >
+              <WhatsappIcon className="h-5 w-5" />
               Converse sobre esse imóvel através do WhatsApp
             </WhatsappCtaLink>
           )}
@@ -225,7 +231,7 @@ function ImovelDetalhe({ listing, id }: { listing: NonNullable<ReturnType<typeof
       {mesmoCondominio.length > 0 && (
         <section className="mt-16">
           <h2 className="mb-6 font-display text-2xl text-navy">Imóveis no mesmo condomínio</h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
             {mesmoCondominio.map((l) => (
               <ImovelCard key={l.codigoImovel} listing={l} />
             ))}
@@ -236,7 +242,7 @@ function ImovelDetalhe({ listing, id }: { listing: NonNullable<ReturnType<typeof
       {mesmoBairro.length > 0 && (
         <section className="mt-16">
           <h2 className="mb-6 font-display text-2xl text-navy">Imóveis no mesmo bairro</h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
             {mesmoBairro.map((l) => (
               <ImovelCard key={l.codigoImovel} listing={l} />
             ))}

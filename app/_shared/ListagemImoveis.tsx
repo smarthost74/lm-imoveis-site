@@ -149,7 +149,7 @@ export function ListagemImoveis({ cidade, finalidade, tipoFixo, searchParams }: 
               type="text"
               name="bairro"
               defaultValue={bairro}
-              className="rounded border border-borda px-3 py-2"
+              className="rounded border border-borda px-3 py-2 text-base sm:text-sm"
             />
           </label>
 
@@ -163,7 +163,7 @@ export function ListagemImoveis({ cidade, finalidade, tipoFixo, searchParams }: 
                 name="precoMin"
                 defaultValue={precoMin}
                 placeholder="Mínimo"
-                className="w-full rounded border border-borda px-3 py-2 text-sm"
+                className="w-full rounded border border-borda px-3 py-2 text-base sm:text-sm"
               />
               <span className="text-texto-suave">–</span>
               <input
@@ -171,7 +171,7 @@ export function ListagemImoveis({ cidade, finalidade, tipoFixo, searchParams }: 
                 name="precoMax"
                 defaultValue={precoMax}
                 placeholder="Máximo"
-                className="w-full rounded border border-borda px-3 py-2 text-sm"
+                className="w-full rounded border border-borda px-3 py-2 text-base sm:text-sm"
               />
             </div>
           </fieldset>
@@ -179,7 +179,7 @@ export function ListagemImoveis({ cidade, finalidade, tipoFixo, searchParams }: 
           <div className="grid grid-cols-3 gap-2">
             <label className="flex flex-col text-sm">
               <span className="mb-1 text-texto-suave">Dorm.</span>
-              <select name="dormitorios" defaultValue={dormitorios ?? ""} className="rounded border border-borda px-2 py-2 text-sm">
+              <select name="dormitorios" defaultValue={dormitorios ?? ""} className="rounded border border-borda px-2 py-2 text-base sm:text-sm">
                 <option value="">-</option>
                 {[1, 2, 3, 4].map((n) => (
                   <option key={n} value={n}>{n}+</option>
@@ -188,7 +188,7 @@ export function ListagemImoveis({ cidade, finalidade, tipoFixo, searchParams }: 
             </label>
             <label className="flex flex-col text-sm">
               <span className="mb-1 text-texto-suave">Suítes</span>
-              <select name="suites" defaultValue={suites ?? ""} className="rounded border border-borda px-2 py-2 text-sm">
+              <select name="suites" defaultValue={suites ?? ""} className="rounded border border-borda px-2 py-2 text-base sm:text-sm">
                 <option value="">-</option>
                 {[1, 2, 3, 4].map((n) => (
                   <option key={n} value={n}>{n}+</option>
@@ -197,7 +197,7 @@ export function ListagemImoveis({ cidade, finalidade, tipoFixo, searchParams }: 
             </label>
             <label className="flex flex-col text-sm">
               <span className="mb-1 text-texto-suave">Vagas</span>
-              <select name="vagas" defaultValue={vagas ?? ""} className="rounded border border-borda px-2 py-2 text-sm">
+              <select name="vagas" defaultValue={vagas ?? ""} className="rounded border border-borda px-2 py-2 text-base sm:text-sm">
                 <option value="">-</option>
                 {[1, 2, 3, 4].map((n) => (
                   <option key={n} value={n}>{n}+</option>
@@ -228,7 +228,7 @@ export function ListagemImoveis({ cidade, finalidade, tipoFixo, searchParams }: 
 
           <label className="flex flex-col text-sm">
             <span className="mb-1 text-texto-suave">Ordenar por</span>
-            <select name="ordenar" defaultValue={ordenacao} className="rounded border border-borda px-3 py-2 text-sm">
+            <select name="ordenar" defaultValue={ordenacao} className="rounded border border-borda px-3 py-2 text-base sm:text-sm">
               <option value="mais-recente">Mais recente</option>
               <option value="menor-preco">Menor preço</option>
               <option value="maior-preco">Maior preço</option>
@@ -248,7 +248,7 @@ export function ListagemImoveis({ cidade, finalidade, tipoFixo, searchParams }: 
         </p>
 
         {pagina.length ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
             {pagina.map((l) => (
               <ImovelCard key={l.codigoImovel} listing={l} />
             ))}

@@ -24,11 +24,11 @@ export default function HomePage() {
 
   return (
     <main className="flex flex-col gap-16 pb-16">
-      <section className="mx-auto w-full max-w-6xl px-4 pt-8">
+      <section className="mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-8 pt-8">
         <SearchBar cidades={["Taubaté"]} />
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-4">
+      <section className="mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-8">
         <h2 className="mb-6 font-display text-2xl text-navy sm:text-3xl">Imóveis em destaque</h2>
 
         <h3 className="mb-4 text-sm font-medium uppercase tracking-wide text-texto-suave">
@@ -56,9 +56,9 @@ export default function HomePage() {
       </section>
 
       {bairros.length > 0 && (
-        <section className="mx-auto w-full max-w-6xl px-4">
+        <section className="mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-8">
           <h2 className="mb-6 font-display text-2xl text-navy sm:text-3xl">Bairros</h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
             {bairros.map((b) => (
               <LocationCard
                 key={b.slug}
@@ -76,9 +76,9 @@ export default function HomePage() {
       )}
 
       {condominios.length > 0 && (
-        <section className="mx-auto w-full max-w-6xl px-4">
+        <section className="mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-8">
           <h2 className="mb-6 font-display text-2xl text-navy sm:text-3xl">Condomínios</h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
             {condominios.map((c) => (
               <LocationCard
                 key={c.slug}
@@ -95,7 +95,7 @@ export default function HomePage() {
         </section>
       )}
 
-      <section className="mx-auto w-full max-w-6xl px-4">
+      <section className="mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-8">
         <h2 className="mb-6 font-display text-2xl text-navy sm:text-3xl">Serviços</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
@@ -115,7 +115,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-4">
+      <section className="mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-8">
         <h2 className="mb-6 font-display text-2xl text-navy sm:text-3xl">Lançamentos</h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {COMPANY.lancamentos.map((l) => (
@@ -156,7 +156,7 @@ export default function HomePage() {
         </Link>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-4">
+      <section className="mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-8">
         <h2 className="mb-6 font-display text-2xl text-navy sm:text-3xl">Buscas mais populares</h2>
         <div className="grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
           {BUSCAS_POPULARES.map((b) => (

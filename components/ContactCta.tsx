@@ -83,19 +83,19 @@ export function ContactCta({
 
         <label className="flex flex-col text-sm">
           <span className="mb-1 text-texto-suave">Nome</span>
-          <input name="nome" required className="rounded border border-borda px-3 py-2" />
+          <input name="nome" required className="rounded border border-borda px-3 py-2 text-base sm:text-sm" />
         </label>
         <label className="flex flex-col text-sm">
           <span className="mb-1 text-texto-suave">Telefone</span>
-          <input name="telefone" required className="rounded border border-borda px-3 py-2" />
+          <input name="telefone" required className="rounded border border-borda px-3 py-2 text-base sm:text-sm" />
         </label>
         <label className="flex flex-col text-sm">
           <span className="mb-1 text-texto-suave">E-mail</span>
-          <input type="email" name="email" className="rounded border border-borda px-3 py-2" />
+          <input type="email" name="email" className="rounded border border-borda px-3 py-2 text-base sm:text-sm" />
         </label>
         <label className="flex flex-col text-sm">
           <span className="mb-1 text-texto-suave">Mensagem</span>
-          <textarea name="mensagem" rows={3} className="rounded border border-borda px-3 py-2" />
+          <textarea name="mensagem" rows={3} className="rounded border border-borda px-3 py-2 text-base sm:text-sm" />
         </label>
 
         <button

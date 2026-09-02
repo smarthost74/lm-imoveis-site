@@ -46,7 +46,7 @@ export default function DemoComponentesPage() {
         <SearchBar cidades={["Taubaté"]} />
       </Hero>
 
-      <section className="mx-auto w-full max-w-6xl px-4">
+      <section className="mx-auto w-full max-w-[1600px] px-4">
         <h2 className="mb-4 font-display text-2xl text-navy">Imóveis em destaque</h2>
         {listings.length ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -62,7 +62,7 @@ export default function DemoComponentesPage() {
         )}
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-4">
+      <section className="mx-auto w-full max-w-[1600px] px-4">
         <h2 className="mb-4 font-display text-2xl text-navy">Bairros e condomínios</h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <LocationCard
@@ -87,13 +87,13 @@ export default function DemoComponentesPage() {
       </section>
 
       {primeiro && (
-        <section className="mx-auto w-full max-w-6xl px-4">
+        <section className="mx-auto w-full max-w-[1600px] px-4">
           <h2 className="mb-4 font-display text-2xl text-navy">Galeria de fotos</h2>
           <Gallery fotos={primeiro.fotos} tituloImovel={primeiro.titulo} />
         </section>
       )}
 
-      <section className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 px-4 lg:grid-cols-2">
+      <section className="mx-auto grid w-full max-w-[1600px] grid-cols-1 gap-6 px-4 lg:grid-cols-2">
         <div>
           <h2 className="mb-4 font-display text-2xl text-navy">Card do corretor</h2>
           <BrokerCard
@@ -113,7 +113,7 @@ export default function DemoComponentesPage() {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-4 text-sm text-texto-suave">
+      <section className="mx-auto w-full max-w-[1600px] px-4 text-sm text-texto-suave">
         <p>WhatsApp de teste: {buildWhatsappLink({ mensagem: "oi" })}</p>
       </section>
     </main>

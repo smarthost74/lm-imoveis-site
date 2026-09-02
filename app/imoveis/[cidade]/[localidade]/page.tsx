@@ -74,7 +74,7 @@ export default async function LocalidadePage({
         minHeight="min-h-[320px]"
       />
 
-      <div className="mx-auto max-w-6xl px-4">
+      <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
         {precoMin !== undefined && (
           <section className="mt-8">
             <h2 className="mb-2 font-display text-xl text-navy">
@@ -100,7 +100,7 @@ export default async function LocalidadePage({
           <h2 className="mb-6 font-display text-xl text-navy">
             Imóveis disponíveis em {nome}
           </h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
             {listings.map((l) => (
               <ImovelCard key={l.codigoImovel} listing={l} />
             ))}

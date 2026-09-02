@@ -10,10 +10,10 @@ import { InstagramIcon, FacebookIcon } from "./icons";
 export function Footer() {
   return (
     <footer className="mt-16 border-t border-borda bg-navy text-white/80">
-      <div className="mx-auto max-w-6xl px-4 pt-12">
+      <div className="mx-auto max-w-[1600px] px-4 pt-12 sm:px-6 lg:px-8">
         <Image src="/logo.png" alt={COMPANY.nome} width={1600} height={781} className="h-10 w-auto" />
       </div>
-      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-4 pb-12 pt-8 sm:grid-cols-4">
+      <div className="mx-auto grid max-w-[1600px] grid-cols-2 gap-8 px-4 pb-12 pt-8 sm:grid-cols-4 sm:px-6 lg:px-8">
         <div>
           <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-dourado-light">
             Encontrar imóveis
