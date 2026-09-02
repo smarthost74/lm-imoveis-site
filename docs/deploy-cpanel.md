@@ -117,7 +117,7 @@ ls public/imoveis-cache/    # deve ter uma pasta por imóvel, com fotos .jpeg/.j
 
 cPanel → **Cron Jobs** → **Add New Cron Job**.
 
-- **Common Settings**: `Once Per Day` (ajustar o horário — de madrugada é mais seguro, ex. `0 4 * * *`).
+- **Common Settings**: `Once Per Day`, horário `00:00` — expressão cron `0 0 * * *` (meia-noite todos os dias, pedido explícito do usuário — atualiza o XML a cada 24h).
 - **Command**:
 
 ```bash
