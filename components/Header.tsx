@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { COMPANY } from "@/lib/company";
 import { trackLeadEvent } from "@/lib/analytics";
-import { PhoneIcon, WhatsappIcon } from "./icons";
+import { PhoneIcon, WhatsappIcon, InstagramIcon, FacebookIcon } from "./icons";
 
 /**
  * Sem mega-menu (só 5 cidades, ficaria vazio/pretensioso — ver CLAUDE.md) e
@@ -48,6 +48,24 @@ export function Header() {
         </nav>
 
         <div className="hidden items-center gap-4 lg:flex">
+          <a
+            href={COMPANY.redesSociais[0]}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Facebook da Lobato & Moraes Imóveis"
+            className="text-white/85 hover:text-dourado-light"
+          >
+            <FacebookIcon className="h-4 w-4" />
+          </a>
+          <a
+            href={COMPANY.redesSociais[1]}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram da Lobato & Moraes Imóveis"
+            className="text-white/85 hover:text-dourado-light"
+          >
+            <InstagramIcon className="h-4 w-4" />
+          </a>
           <a href={`tel:${COMPANY.whatsapp}`} className="flex items-center gap-1 text-sm text-white/85 hover:text-dourado-light">
             <PhoneIcon className="h-4 w-4" />
             {COMPANY.telefoneExibicao}
@@ -102,6 +120,26 @@ export function Header() {
               >
                 <WhatsappIcon className="h-4 w-4" />
                 WhatsApp
+              </a>
+            </li>
+            <li className="mt-4 flex justify-center gap-6">
+              <a
+                href={COMPANY.redesSociais[0]}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook da Lobato & Moraes Imóveis"
+                className="text-white/85 hover:text-dourado-light"
+              >
+                <FacebookIcon className="h-5 w-5" />
+              </a>
+              <a
+                href={COMPANY.redesSociais[1]}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram da Lobato & Moraes Imóveis"
+                className="text-white/85 hover:text-dourado-light"
+              >
+                <InstagramIcon className="h-5 w-5" />
               </a>
             </li>
           </ul>

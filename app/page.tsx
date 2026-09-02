@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { SearchBar } from "@/components/SearchBar";
-import { ImovelCard } from "@/components/ImovelCard";
+import { ImovelCarousel } from "@/components/ImovelCarousel";
 import { LocationCard } from "@/components/LocationCard";
 import { getActiveListings, getBairros, getCondominios } from "@/lib/data";
 import { COMPANY } from "@/lib/company";
@@ -17,12 +17,8 @@ const BUSCAS_POPULARES = [
 ];
 
 export default function HomePage() {
-  const destaquesVenda = getActiveListings()
-    .filter((l) => l.finalidade === "venda")
-    .slice(0, 4);
-  const destaquesLocacao = getActiveListings()
-    .filter((l) => l.finalidade === "locacao")
-    .slice(0, 4);
+  const destaquesVenda = getActiveListings().filter((l) => l.finalidade === "venda");
+  const destaquesLocacao = getActiveListings().filter((l) => l.finalidade === "locacao");
   const bairros = getBairros().slice(0, 4);
   const condominios = getCondominios().slice(0, 4);
 
@@ -39,10 +35,8 @@ export default function HomePage() {
           À venda
         </h3>
         {destaquesVenda.length ? (
-          <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {destaquesVenda.map((l) => (
-              <ImovelCard key={l.codigoImovel} listing={l} />
-            ))}
+          <div className="mb-8">
+            <ImovelCarousel listings={destaquesVenda} />
           </div>
         ) : (
           <p className="mb-8 text-texto-suave">Nenhum imóvel à venda no momento.</p>
@@ -52,11 +46,7 @@ export default function HomePage() {
           Para locação
         </h3>
         {destaquesLocacao.length ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {destaquesLocacao.map((l) => (
-              <ImovelCard key={l.codigoImovel} listing={l} />
-            ))}
-          </div>
+          <ImovelCarousel listings={destaquesLocacao} />
         ) : (
           <p className="text-texto-suave">
             Nenhum imóvel para locação no momento — fale com a gente pelo WhatsApp, nossa
