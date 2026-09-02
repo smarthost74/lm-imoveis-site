@@ -32,10 +32,10 @@ export function Header() {
           <Image
             src="/logo.png"
             alt={COMPANY.nome}
-            width={1495}
-            height={139}
+            width={1600}
+            height={781}
             priority
-            className="h-8 w-auto"
+            className="h-12 w-auto"
           />
         </Link>
 
