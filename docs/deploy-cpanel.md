@@ -61,11 +61,13 @@ Duas formas — use a que sua hospedagem oferecer:
 ```bash
 source /home/usuario/nodevenv/CAMINHO_DO_APP/24/bin/activate   # comando exato que o cPanel mostrou no passo 1
 cd ~/CAMINHO_DO_APP
-npm install
-npm run build
+npm install --include=dev
+taskset -c 0-3 npx next build --webpack
 ```
 
-5. Voltar em **Setup Node.js App** e clicar **Restart**.
+Ver caixa **"Limite de processos (CloudLinux/LVE)"** logo abaixo antes de rodar isso — os dois flags (`--include=dev` e `taskset ... --webpack`) não são opcionais nesta hospedagem.
+
+5. Voltar em **Setup Node.js App** e clicar **Restart** (se der erro "Unable to fork"/"reached resource limits", ver a mesma caixa abaixo — tem um jeito alternativo de reiniciar que não esbarra nesse limite).
 
 ### Opção B — SSH manual (se não tiver Git Version Control)
 
@@ -74,11 +76,11 @@ ssh usuario@seuservidor
 git clone <url-do-repo> caminho/do/app
 cd caminho/do/app
 source /home/usuario/nodevenv/caminho-do-app/24/bin/activate
-npm install
-npm run build
+npm install --include=dev
+taskset -c 0-3 npx next build --webpack
 ```
 
-Depois, no painel, **Setup Node.js App → Restart**.
+Depois, no painel, **Setup Node.js App → Restart** (ou `touch tmp/restart.txt`, ver caixa abaixo).
 
 ### Redeploys seguintes
 
@@ -87,9 +89,39 @@ Sempre a mesma sequência depois de um `git pull`:
 ```bash
 source .../nodevenv/.../24/bin/activate
 git pull
-npm install       # só se package.json mudou
-npm run build
+npm install --include=dev       # só se package.json mudou
+rm -rf .next
+taskset -c 0-3 npx next build --webpack
+touch tmp/restart.txt
 ```
+
+> ### ⚠️ Limite de processos (CloudLinux/LVE) — não pedir upgrade, usar os workarounds
+>
+> Esta hospedagem roda em CloudLinux com limite de processos simultâneos por
+> conta (LVE), num servidor que reporta ~80 CPUs — sem os ajustes abaixo,
+> tanto o build quanto um simples restart podem falhar com `EAGAIN` ("spawn
+> ... EAGAIN") ou `cagefs_enter: Unable to fork` ("reached resource limits
+> (... number of processes ...)"). **Decisão do usuário (02/09/2026): não
+> aumentar esse limite com o provedor, pra não aumentar o custo do plano** —
+> os workarounds abaixo resolvem sem precisar de upgrade nenhum.
+>
+> 1. **Build**: `experimental.cpus: 2` já está fixado em `next.config.ts`
+>    (não precisa mexer, é permanente) — sem isso, a etapa "Collecting page
+>    data" tenta abrir um worker por CPU do servidor (~40) e estoura o
+>    limite. Mesmo assim, rode o build com `taskset -c 0-3` na frente
+>    (restringe a 4 núcleos) — uma etapa anterior do build (webpack em si)
+>    ainda decide o paralelismo pela afinidade de CPU do processo, não pelo
+>    `experimental.cpus`.
+> 2. **`npm install` sem `--include=dev`**: o cPanel grava alguma config de
+>    "Production" que faz o `npm install` puxar só as dependências de
+>    produção — mas o build precisa de `@tailwindcss/postcss`, `typescript`
+>    etc. (devDependencies). Sempre `npm install --include=dev` antes de
+>    buildar.
+> 3. **Restart pelo botão do painel pode falhar** mesmo com a conta quase
+>    ociosa (visto com só 5 processos rodando) — é um limite de *rajada* no
+>    momento do restart, não de uso constante. Nesse caso, `touch
+>    tmp/restart.txt` dentro do Application Root reinicia sem esbarrar
+>    nisso (mesma convenção do Passenger já mencionada acima).
 
 E clicar **Restart** no painel (ou `touch tmp/restart.txt` dentro do Application Root, se o Passenger dessa hospedagem usar esse convenção — o botão do painel é mais confiável).
 

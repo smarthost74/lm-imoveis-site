@@ -443,15 +443,33 @@ cache funcionou como projetado, sem exceção não tratada.
 
 ## Deploy (cPanel)
 
-Guia completo em `docs/deploy-cpanel.md` (não testado contra um cPanel
-real ainda — só o `server.js` e o build, localmente). Pontos que não são
-óbvios: o Passenger do cPanel precisa de um arquivo de entrada que escute
-em `process.env.PORT` — `next start` sozinho não serve, por isso existe
-`server.js` na raiz (custom server mínimo, `npm run start:cpanel` roda
-localmente para testar). Variáveis de ambiente definidas na UI do "Setup
-Node.js App" só valem para o processo do site — **não** ficam disponíveis
+Guia completo em `docs/deploy-cpanel.md` — **testado e funcionando de
+verdade** em 02/09/2026, no subdomínio de staging
+`novo.lobatoemoraesimoveis.com.br` (SmartHost). Código no GitHub
+(`smarthost74/lm-imoveis-site`, privado, deploy key só-leitura no
+servidor — sem isso ainda quando "instalar o site" for pedido de novo,
+ver seção Git/GitHub do guia). Pontos que não são óbvios: o Passenger do
+cPanel precisa de um arquivo de entrada que escute em `process.env.PORT`
+— `next start` sozinho não serve, por isso existe `server.js` na raiz
+(custom server mínimo, `npm run start:cpanel` roda localmente para
+testar). Variáveis de ambiente definidas na UI do "Setup Node.js App" só
+valem para o processo do site — **não** ficam disponíveis
 automaticamente no cron job nem em comandos manuais por SSH (precisa de
 `.env.production` separado, fora do Git, ou exportar na sessão).
+
+**Limite de processos (CloudLinux/LVE) — decisão do usuário: não pedir
+upgrade.** O servidor reporta ~80 CPUs, mas a conta tem um teto de
+processos simultâneos bem mais baixo — sem tratar isso, tanto o build
+(`EAGAIN` ao spawnar workers) quanto um simples restart pelo painel
+(`cagefs_enter: Unable to fork`) podem falhar, mesmo com a conta quase
+ociosa. O usuário decidiu explicitamente **não** aumentar esse limite
+com o provedor (aumentaria o custo do plano) — a solução são os
+workarounds sem custo documentados em `docs/deploy-cpanel.md` (caixa
+"Limite de processos"): `experimental.cpus: 2` já fixado em
+`next.config.ts` (permanente), `taskset -c 0-3` na frente do build,
+`npm install --include=dev` (senão o build falha por faltar
+devDependencies), e `touch tmp/restart.txt` no lugar do botão
+"Restart" do painel quando ele falhar.
 
 ## Segurança
 
