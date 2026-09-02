@@ -64,13 +64,27 @@ Piso não negociável: mobile-first, foco de teclado visível (`:focus-visible`
 já em `globals.css`), `prefers-reduced-motion` respeitado (já tratado em
 `globals.css`), contraste adequado, `alt` descritivo em toda imagem.
 
-**Logo oficial:** `public/logo.png`, recortado com `sharp` a partir do
-arquivo original em `.../05_Marketing_e_Publicidade/Identidade_Visual/
-Logotipo Oficial Sem Fundo PNG.png` (o arquivo original tem uma área
-transparente enorme ao redor do texto — `public/logo.png` já vem cortado
-para o bounding box real do wordmark "LOBATO & MORAES" em dourado). Não há
-versão invertida (branca) com transparência disponível ainda — o rodapé
-(fundo navy) usa texto, não a logo, até existir esse arquivo.
+**Logo oficial:** `public/logo.png` — lockup completo (losango branco +
+"LOBATO & MORAES" dourado + "IMÓVEIS" branco), fundo transparente. **Não
+veio da pasta `Identidade_Visual`** — os arquivos "Logotipo Oficial ..."
+de lá são só o wordmark em texto, sem o losango, e não são a marca usada
+de verdade hoje. A marca real (a mesma que aparece como marca d'água em
+toda foto de imóvel do feed) estava dentro de `Placa ALUGA.pdf`, na mesma
+pasta. Extraído em 01/09/2026 via `pdftoppm` (600dpi) + `sharp`: recortado
+o bloco do logo, removido o texto "CRECI 51865-J" que vinha junto
+(específico da placa física), chroma-key da cor navy para transparência.
+`app/icon.png`/`app/apple-icon.png` usam só o losango (recorte quadrado) —
+favicon bem mais legível que a tentativa anterior com o wordmark inteiro
+espremido em 16-32px. Usado no header e no footer (os dois já são
+`bg-navy`, então a transparência compõe sem costura).
+
+Se precisar regenerar esses assets, o processo é: `pdftoppm -png -r 600
+"Placa ALUGA.pdf"` → localizar o bloco do logo por amostragem de pixel
+(região navy sólida no canto superior esquerdo) → cobrir o texto CRECI
+com um retângulo da cor de fundo → chroma-key navy→transparente para a
+versão do header/footer → recorte quadrado do losango sozinho para favicon.
+Não existe (ainda) um SVG vetorial da marca — se o usuário conseguir um,
+prefira sempre a fonte vetorial a re-extrair do PDF da placa.
 
 ## Os 8 componentes (Etapa 4 — concluída)
 
