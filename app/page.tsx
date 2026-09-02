@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Hero } from "@/components/Hero";
 import { SearchBar } from "@/components/SearchBar";
 import { ImovelCard } from "@/components/ImovelCard";
 import { LocationCard } from "@/components/LocationCard";
@@ -18,34 +17,51 @@ const BUSCAS_POPULARES = [
 ];
 
 export default function HomePage() {
-  const destaques = getActiveListings().slice(0, 8);
+  const destaquesVenda = getActiveListings()
+    .filter((l) => l.finalidade === "venda")
+    .slice(0, 4);
+  const destaquesLocacao = getActiveListings()
+    .filter((l) => l.finalidade === "locacao")
+    .slice(0, 4);
   const bairros = getBairros().slice(0, 4);
   const condominios = getCondominios().slice(0, 4);
 
-  // 3 fotos principais de imóveis diferentes, para o banner (sem texto, só imagem).
-  const fotosBanner = getActiveListings()
-    .slice(0, 3)
-    .map((l) => {
-      const capa = l.fotos.find((f) => f.isPrimary) ?? l.fotos[0];
-      return { src: capa.localPath ?? capa.sourceUrl, alt: `Foto de ${l.titulo}` };
-    });
-
   return (
     <main className="flex flex-col gap-16 pb-16">
-      <Hero layout="split" photos={fotosBanner}>
+      <section className="mx-auto w-full max-w-6xl px-4 pt-8">
         <SearchBar cidades={["Taubaté"]} />
-      </Hero>
+      </section>
 
       <section className="mx-auto w-full max-w-6xl px-4">
         <h2 className="mb-6 font-display text-2xl text-navy sm:text-3xl">Imóveis em destaque</h2>
-        {destaques.length ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {destaques.map((l) => (
+
+        <h3 className="mb-4 text-sm font-medium uppercase tracking-wide text-texto-suave">
+          À venda
+        </h3>
+        {destaquesVenda.length ? (
+          <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {destaquesVenda.map((l) => (
               <ImovelCard key={l.codigoImovel} listing={l} />
             ))}
           </div>
         ) : (
-          <p className="text-texto-suave">Nenhum imóvel disponível no momento.</p>
+          <p className="mb-8 text-texto-suave">Nenhum imóvel à venda no momento.</p>
+        )}
+
+        <h3 className="mb-4 text-sm font-medium uppercase tracking-wide text-texto-suave">
+          Para locação
+        </h3>
+        {destaquesLocacao.length ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {destaquesLocacao.map((l) => (
+              <ImovelCard key={l.codigoImovel} listing={l} />
+            ))}
+          </div>
+        ) : (
+          <p className="text-texto-suave">
+            Nenhum imóvel para locação no momento — fale com a gente pelo WhatsApp, nossa
+            carteira muda com frequência.
+          </p>
         )}
       </section>
 

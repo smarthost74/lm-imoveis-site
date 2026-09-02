@@ -6,11 +6,10 @@ import { slugify } from "@/lib/feed/slug";
 import { SearchIcon } from "./icons";
 
 /**
- * Busca compacta em cartão flutuante (padrão Chaves na Mão, pedido
- * explícito do usuário — ver CLAUDE.md). Abas Comprar/Alugar substituem as
- * abas originais "Imóveis/Veículos" do modelo de referência. Dormitórios e
- * faixa de valor saíram daqui — viraram filtro lateral na página de
- * listagem (mais detalhe faz sentido lá, não na busca de entrada).
+ * Busca horizontal com abas no formato de guias do Chrome — pedido
+ * explícito do usuário. A aba ativa "funde" com o painel de campos logo
+ * abaixo (mesma cor, sem borda entre os dois); a inativa fica recuada,
+ * como uma guia de navegador em segundo plano.
  */
 const TIPOS = ["Apartamento", "Casa", "Sala Comercial", "Loja", "Galpão"];
 
@@ -40,30 +39,31 @@ export function SearchBar({ cidades = ["Taubaté"] }: { cidades?: string[] }) {
   }
 
   return (
-    <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
-      <h2 className="mb-4 font-display text-xl text-navy">Escolha o seu novo imóvel</h2>
-
-      <div role="tablist" aria-label="Finalidade da busca" className="mb-4 flex gap-2">
-        {(["venda", "locacao"] as const).map((f) => (
-          <button
-            key={f}
-            role="tab"
-            type="button"
-            aria-selected={finalidade === f}
-            onClick={() => setFinalidade(f)}
-            className={`flex-1 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-              finalidade === f
-                ? "border-navy bg-navy text-white"
-                : "border-borda bg-white text-texto-suave hover:border-navy"
-            }`}
-          >
-            {f === "venda" ? "Comprar" : "Alugar"}
-          </button>
-        ))}
+    <div className="w-full">
+      <div role="tablist" aria-label="Finalidade da busca" className="flex gap-1 px-1">
+        {(["venda", "locacao"] as const).map((f) => {
+          const ativa = finalidade === f;
+          return (
+            <button
+              key={f}
+              role="tab"
+              type="button"
+              aria-selected={ativa}
+              onClick={() => setFinalidade(f)}
+              className={`rounded-t-lg px-6 py-2.5 text-sm font-medium transition-colors ${
+                ativa
+                  ? "bg-white text-navy"
+                  : "mt-1 bg-borda text-texto-suave hover:bg-borda/70"
+              }`}
+            >
+              {f === "venda" ? "Comprar" : "Alugar"}
+            </button>
+          );
+        })}
       </div>
 
-      <div className="flex flex-col gap-3">
-        <label className="flex flex-col text-sm">
+      <div className="flex flex-col gap-3 rounded-b-lg rounded-tr-lg bg-white p-4 shadow-md sm:flex-row sm:items-end">
+        <label className="flex flex-1 flex-col text-sm">
           <span className="mb-1 font-medium text-texto-suave">Tipo de Imóvel</span>
           <select
             value={tipo}
@@ -79,7 +79,7 @@ export function SearchBar({ cidades = ["Taubaté"] }: { cidades?: string[] }) {
           </select>
         </label>
 
-        <label className="flex flex-col text-sm">
+        <label className="flex flex-[2] flex-col text-sm">
           <span className="mb-1 font-medium text-texto-suave">Localização</span>
           <input
             type="text"
@@ -93,7 +93,7 @@ export function SearchBar({ cidades = ["Taubaté"] }: { cidades?: string[] }) {
         <button
           type="button"
           onClick={buscar}
-          className="mt-1 flex w-full items-center justify-center gap-2 rounded-lg bg-dourado px-4 py-3 font-medium text-navy transition-colors hover:brightness-95"
+          className="flex items-center justify-center gap-2 rounded-lg bg-dourado px-6 py-2.5 font-medium text-navy transition-colors hover:brightness-95"
         >
           <SearchIcon className="h-4 w-4" />
           Buscar
