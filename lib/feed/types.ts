@@ -28,7 +28,8 @@ export type CharacteristicGroup =
   | "lazer_condominio"
   | "seguranca"
   | "acabamento_imovel"
-  | "infraestrutura_lote";
+  | "infraestrutura_lote"
+  | "condicoes_negociacao";
 
 export interface CharacteristicInfo {
   key: CharacteristicKey;

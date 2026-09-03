@@ -54,6 +54,46 @@ export const CHARACTERISTIC_MAP: Record<CharacteristicKey, CharacteristicInfo> =
   AreaServico: { key: "AreaServico", label: "Área de serviço", group: "infraestrutura_lote" },
   EntradaServicoIndependente: { key: "EntradaServicoIndependente", label: "Entrada de serviço independente", group: "infraestrutura_lote" },
   Quintal: { key: "Quintal", label: "Quintal", group: "infraestrutura_lote" },
+  Esgoto: { key: "Esgoto", label: "Esgoto", group: "infraestrutura_lote" },
+  GasEncanado: { key: "GasEncanado", label: "Gás encanado", group: "infraestrutura_lote" },
+  RuaAsfaltada: { key: "RuaAsfaltada", label: "Rua asfaltada", group: "infraestrutura_lote" },
+  Esquina: { key: "Esquina", label: "Esquina", group: "infraestrutura_lote" },
+  CasaPrincipal: { key: "CasaPrincipal", label: "Casa principal", group: "infraestrutura_lote" },
+  Edicula: { key: "Edicula", label: "Edícula", group: "infraestrutura_lote" },
+
+  // Lazer do condomínio (relabelado "Lazer e proximidades" quando o imóvel
+  // não tem condomínio — ver app/imovel/[...legacy]/page.tsx — por isso
+  // itens de entorno/vista natural entram aqui, não só amenidade construída)
+  Bosque: { key: "Bosque", label: "Bosque", group: "lazer_condominio" },
+  Rio: { key: "Rio", label: "Rio", group: "lazer_condominio" },
+  VistaPanoramica: { key: "VistaPanoramica", label: "Vista panorâmica", group: "lazer_condominio" },
+  Solarium: { key: "Solarium", label: "Solarium", group: "lazer_condominio" },
+  SpaHidromassagem: { key: "SpaHidromassagem", label: "Spa com hidromassagem", group: "lazer_condominio" },
+  EstacionamentoVisitantes: { key: "EstacionamentoVisitantes", label: "Estacionamento para visitantes", group: "lazer_condominio" },
+
+  // Segurança
+  Acesso24Horas: { key: "Acesso24Horas", label: "Acesso 24 horas", group: "seguranca" },
+
+  // Acabamento do imóvel
+  Acessibilidade: { key: "Acessibilidade", label: "Acessibilidade", group: "acabamento_imovel" },
+  AmbientesIntegrados: { key: "AmbientesIntegrados", label: "Ambientes integrados", group: "acabamento_imovel" },
+  ArmarioCozinha: { key: "ArmarioCozinha", label: "Armário de cozinha", group: "acabamento_imovel" },
+  ArmarioEmbutido: { key: "ArmarioEmbutido", label: "Armário embutido", group: "acabamento_imovel" },
+  Despensa: { key: "Despensa", label: "Despensa", group: "acabamento_imovel" },
+  Escritorio: { key: "Escritorio", label: "Escritório", group: "acabamento_imovel" },
+  Fogao: { key: "Fogao", label: "Fogão", group: "acabamento_imovel" },
+  Lareira: { key: "Lareira", label: "Lareira", group: "acabamento_imovel" },
+  PisoElevado: { key: "PisoElevado", label: "Piso elevado", group: "acabamento_imovel" },
+  SalaJantar: { key: "SalaJantar", label: "Sala de jantar", group: "acabamento_imovel" },
+  ProntoMorar: { key: "ProntoMorar", label: "Pronto para morar", group: "acabamento_imovel" },
+  StandVendasLocal: { key: "StandVendasLocal", label: "Stand de vendas no local", group: "acabamento_imovel" },
+
+  // Condições de negociação (não é característica física do imóvel, mas
+  // vem no mesmo campo de tags do feed)
+  AceitaPermuta: { key: "AceitaPermuta", label: "Aceita permuta", group: "condicoes_negociacao" },
+  AceitaPermutaCarro: { key: "AceitaPermutaCarro", label: "Aceita permuta por carro", group: "condicoes_negociacao" },
+  AceitaPermutaImovel: { key: "AceitaPermutaImovel", label: "Aceita permuta por imóvel", group: "condicoes_negociacao" },
+  EstudaPermuta: { key: "EstudaPermuta", label: "Estuda permuta", group: "condicoes_negociacao" },
 };
 
 export function mapCharacteristics(keys: CharacteristicKey[]): {
@@ -75,6 +115,7 @@ const GROUP_LABELS: Record<CharacteristicGroup, string> = {
   seguranca: "Segurança",
   acabamento_imovel: "Acabamento do imóvel",
   infraestrutura_lote: "Infraestrutura do terreno/lote",
+  condicoes_negociacao: "Condições de negociação",
 };
 
 export function groupCharacteristics(
